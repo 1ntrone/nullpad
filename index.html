@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080c0b">
+  <title>NULLPAD — Metaphysical Sciences Division</title>
+  <style>
+    :root {
+      --bg: #070a09; --panel: #101715; --panel2: #0b100e;
+      --line: #34443d; --muted: #8ca49a; --text: #dce9e2;
+      --green: #9bd6b5; --green2: #42a875; --red: #ff646b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background:
+      radial-gradient(ellipse at 50% -20%, #183126 0, transparent 52%), var(--bg);
+      color: var(--text); font: 15px/1.55 "Courier New", ui-monospace, monospace;
+      letter-spacing: .015em;
+    }
+    a { color: inherit; }
+    .shell { width: min(960px, calc(100% - 32px)); margin: 42px auto; }
+    .topline { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:14px; color:var(--muted); font-size:12px; }
+    .status { color:var(--red); border:1px solid #71343a; background:#291518; border-radius:3px; padding:4px 9px; font-weight:bold; }
+    .frame { border:1px solid var(--line); border-radius:12px; background:rgba(16,23,21,.96); padding:24px; box-shadow:0 18px 60px #0008; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+    h1 { margin:0; font-size: clamp(27px, 5vw, 38px); letter-spacing:.06em; color:#b8e5cb; }
+    .subtitle { color:var(--muted); margin-top:5px; font-size:12px; letter-spacing:.08em; }
+    .rule { border:0; border-top:1px solid #53665c; margin:22px 0; }
+    .center { text-align:center; }
+    h2 { margin:0; font-size:21px; letter-spacing:.04em; }
+    .subcenter { color:var(--muted); font-size:12px; margin-top:5px; }
+    .section { border:1px solid var(--line); margin-top:22px; padding:16px; background:#0c1210; }
+    .section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
+    h3 { margin:0; font-size:16px; color:#cfe8d8; }
+    .search { width:min(290px, 100%); background:#070c0a; color:var(--text); border:1px solid #40544a; padding:9px 11px; border-radius:4px; font:inherit; }
+    .files { display:grid; gap:8px; }
+    .file {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:11px 12px; border:1px solid transparent; background:#101916;
+      text-decoration:none; transition:.15s ease;
+    }
+    .file.available { color:var(--green); border-color:#294d3a; cursor:pointer; }
+    .file.available:hover { background:#14251c; border-color:var(--green2); }
+    .file.locked { color:var(--red); border-color:#522b30; background:#1a1012; cursor:not-allowed; opacity:.88; }
+    .file small { color:var(--muted); font-size:11px; text-align:right; }
+    .file.locked small { color:#c56b70; }
+    .notice { margin:16px 0 0; color:var(--muted); text-align:center; font-size:11px; }
+    footer { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:18px; color:#6f887b; font-size:11px; }
+    .screen { display:none; margin-top:20px; border:1px solid #40584a; background:#0a100d; padding:18px; }
+    .screen.active { display:block; }
+    .back { border:1px solid #52675b; color:var(--green); background:transparent; padding:7px 11px; cursor:pointer; font:inherit; margin-bottom:16px; }
+    .pending { border-left:3px solid var(--green2); padding:10px 13px; background:#101b15; color:#b5cabe; }
+    .empty { color:var(--muted); text-align:center; padding:15px; display:none; }
+    @media (max-width:600px) {
+      .shell { margin:18px auto; width:calc(100% - 20px); }
+      .frame { padding:16px; }
+      .section-head { align-items:flex-start; flex-direction:column; }
+      .search { width:100%; }
+      .file { align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="topline">
+      <span>NULLPAD NETWORK // INTERNAL ARCHIVE</span>
+      <span class="status">● CLASSIFIED</span>
+    </div>
+
+    <div class="frame">
+      <header>
+        <div>
+          <h1>NULLPAD</h1>
+          <div class="subtitle">METAPHYSICAL SCIENCES DIVISION</div>
+        </div>
+        <span class="status">RESTRICTED</span>
+      </header>
+
+      <hr class="rule">
+
+      <section class="center">
+        <h2>RESTRICTED DATABASE</h2>
+        <div class="subcenter">ARCHIVE ACCESS INTERFACE</div>
+      </section>
+
+      <section class="section" aria-label="Database files">
+        <div class="section-head">
+          <h3>DATABASE FILES</h3>
+          <input id="search" class="search" type="search" placeholder="Search archive..." aria-label="Search archive">
+        </div>
+        <div class="files" id="files">
+          <a class="file available" href="#file-001" data-search="001 freslike incident incident">
+            <span>[001] FRESLIKE INCIDENT</span><small>OPEN FILE ↗</small>
+          </a>
+          <div class="file locked" data-search="002 anomaly reports">
+            <span>[002] ANOMALY REPORTS</span><small>ACCESS DENIED</small>
+          </div>
+          <div class="file locked" data-search="003 human research">
+            <span>[003] HUMAN RESEARCH</span><small>ACCESS DENIED</small>
+          </div>
+          <div class="file locked" data-search="004 agent records">
+            <span>[004] AGENT RECORDS</span><small>ACCESS DENIED</small>
+          </div>
+        </div>
+        <div class="empty" id="empty">NO MATCHING RECORDS FOUND</div>
+      </section>
+
+      <section class="screen" id="file-001">
+        <button class="back" id="back">← BACK TO DATABASE</button>
+        <div class="subtitle">FILE 001 // FRESLIKE INCIDENT</div>
+        <h2 style="margin:8px 0 14px">ARCHIVE ENTRY PENDING</h2>
+        <div class="pending">
+          This file has been reserved. Its contents will be added after the archive entry is provided by the project owner.
+        </div>
+        <p class="notice" style="text-align:left">DOCUMENT STATUS: AWAITING AUTHORIZED CONTENT</p>
+      </section>
+
+      <p class="notice">UNAUTHORIZED ACCESS IS PROHIBITED</p>
+      <footer>
+        <span>NULLPAD © <span id="year"></span></span>
+        <span>METAPHYSICAL SCIENCES DIVISION</span>
+        <span>BUILD 0.1 // ARCHIVE INTERFACE</span>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    const search = document.getElementById('search');
+    const files = [...document.querySelectorAll('#files .file')];
+    const empty = document.getElementById('empty');
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLowerCase();
+      let shown = 0;
+      files.forEach(file => {
+        const match = file.dataset.search.includes(query);
+        file.style.display = match ? 'flex' : 'none';
+        if (match) shown++;
+      });
+      empty.style.display = shown ? 'none' : 'block';
+    });
+
+    const screen = document.getElementById('file-001');
+    document.querySelector('a[href="#file-001"]').addEventListener('click', event => {
+      event.preventDefault();
+      screen.classList.add('active');
+      document.querySelector('.section').style.display = 'none';
+      document.querySelector('.center').style.display = 'none';
+      window.location.hash = 'file-001';
+    });
+    document.getElementById('back').addEventListener('click', () => {
+      screen.classList.remove('active');
+      document.querySelector('.section').style.display = 'block';
+      document.querySelector('.center').style.display = 'block';
+      history.replaceState(null, '', location.pathname);
+    });
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
