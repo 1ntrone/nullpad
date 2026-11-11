@@ -28,6 +28,10 @@ body {
     font: 14px/1.6 "Courier New", monospace;
 }
 
+button, input {
+    font: inherit;
+}
+
 .shell {
     width: min(960px, calc(100% - 28px));
     margin: 32px auto;
@@ -41,8 +45,7 @@ body {
     box-shadow: 0 18px 60px #0009;
 }
 
-.topline,
-footer {
+.topline, footer {
     display: flex;
     justify-content: space-between;
     gap: 12px;
@@ -173,7 +176,6 @@ p {
     color: var(--text);
     border: 1px solid #40544a;
     padding: 9px;
-    font: inherit;
 }
 
 .section-head {
@@ -193,16 +195,6 @@ p {
 
 .view.active {
     display: block;
-}
-
-.back {
-    border: 1px solid #52675b;
-    color: var(--green);
-    background: transparent;
-    padding: 7px 11px;
-    cursor: pointer;
-    font: inherit;
-    margin-bottom: 15px;
 }
 
 .record {
@@ -226,8 +218,7 @@ p {
     border-bottom: 0;
 }
 
-.notice,
-.empty {
+.notice, .empty {
     text-align: center;
     color: var(--muted);
     font-size: 11px;
@@ -242,6 +233,41 @@ footer {
     margin-top: 18px;
 }
 
+/* BUTTONS */
+
+.main-button, .back {
+    border: 1px solid #4b936a;
+    background: #173324;
+    color: #c5f0d5;
+    padding: 12px 18px;
+    cursor: pointer;
+    letter-spacing: .08em;
+    transition: background .2s, border-color .2s, transform .2s;
+}
+
+.main-button:hover, .back:hover {
+    background: #20452f;
+    border-color: var(--green);
+    transform: translateY(-2px);
+}
+
+.database-button-wrap {
+    text-align: center;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+}
+
+.database-button-wrap p {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.back {
+    margin-bottom: 15px;
+    padding: 7px 11px;
+}
+
 /* ACCESS SCREEN */
 
 #gate {
@@ -252,6 +278,7 @@ footer {
     display: grid;
     place-items: center;
     padding: 18px;
+    opacity: 1;
 }
 
 .gatebox {
@@ -276,7 +303,6 @@ footer {
     background: #050907;
     border: 1px solid #52675b;
     color: var(--text);
-    font: inherit;
 }
 
 .gatebox button {
@@ -285,7 +311,6 @@ footer {
     background: #173324;
     color: #c5f0d5;
     border: 1px solid #4b936a;
-    font: inherit;
     cursor: pointer;
 }
 
@@ -297,6 +322,61 @@ footer {
     color: var(--red);
     min-height: 20px;
     font-size: 11px;
+}
+
+/* ANIMATIONS */
+
+#gate.leaving {
+    animation: gateFade .55s ease forwards;
+}
+
+#site[hidden] {
+    display: none;
+}
+
+#site.entering {
+    animation: siteReveal .85s ease both;
+}
+
+@keyframes gateFade {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(1.025);
+        visibility: hidden;
+    }
+}
+
+@keyframes siteReveal {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+        filter: blur(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes sectionReveal {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.database-page.active,
+.view.active {
+    animation: sectionReveal .35s ease both;
 }
 
 @media (max-width: 620px) {
@@ -340,12 +420,10 @@ footer {
                 type="password"
                 placeholder="••••••"
                 autocomplete="off"
-                autofocus
                 required
             >
 
             <button type="submit">AUTHENTICATE</button>
-
             <div id="error" class="error"></div>
         </form>
 
@@ -371,127 +449,144 @@ footer {
                 <h1>NULLPAD</h1>
                 <div class="subtitle">METAPHYSICAL SCIENCES DIVISION</div>
             </div>
-
             <span class="pill">RESTRICTED</span>
         </header>
 
         <hr>
 
-        <section class="center">
-            <h2>RESTRICTED DATABASE</h2>
-            <div class="subtitle">
-                ARCHIVE ACCESS INTERFACE // EST. 2013
+        <div id="homePage">
+
+            <section class="center">
+                <h2>RESTRICTED DATABASE</h2>
+                <div class="subtitle">
+                    ARCHIVE ACCESS INTERFACE // EST. 2013
+                </div>
+            </section>
+
+            <!-- ABOUT -->
+
+            <section class="section">
+                <h3>ABOUT THE DIVISION</h3>
+
+                <p>
+                    <b>NULLPAD</b> is a classified subdivision of the
+                    Metaphysical Sciences Department, established in
+                    <b>2013</b> to investigate irregular phenomena occurring
+                    within Minecraft environments.
+                </p>
+
+                <p>
+                    The division operates observation infrastructure
+                    across multiplayer and private servers. Its research
+                    is not limited to modern releases: legacy builds,
+                    experimental versions, snapshots, Alpha and Beta
+                    environments are all valid observation grounds.
+                    An anomaly does not become irrelevant simply because
+                    the software is old.
+                </p>
+
+                <p>
+                    NULLPAD documents unusual world behaviour,
+                    unexplained terrain and chunk irregularities,
+                    broken or inconsistent game mechanics, entities
+                    that appear not to belong to the expected game
+                    environment, and events whose behaviour cannot
+                    readily be explained by ordinary server activity.
+                </p>
+
+                <p>
+                    Reports are treated as records, not conclusions.
+                    Investigators preserve version details, server
+                    identifiers, timestamps, observed behaviour and
+                    repeatability notes wherever available. A strange
+                    sighting may be a software fault, plugin interaction,
+                    corrupted world state, player-created event—or an
+                    unresolved case.
+                </p>
+
+                <p>
+                    Each monitored server maintains its own file
+                    collection. Standard archives may contain
+                    <b>100 or more records per server</b>. Large,
+                    high-population or heavily documented servers are
+                    handled differently: their activity is indexed
+                    selectively, and files are created when a distinct
+                    incident or meaningful pattern is identified.
+                </p>
+
+                <p>
+                    NULLPAD's central purpose is to build a long-term
+                    catalogue of the unexpected: what was observed,
+                    where it occurred, which version was involved,
+                    and whether the event could be reproduced.
+                </p>
+
+                <p class="muted">
+                    INTERNAL DIRECTIVE: Preserve original observations.
+                    Avoid embellishment. Mark unverified interpretations
+                    as provisional.
+                </p>
+            </section>
+
+            <!-- PROFILE -->
+
+            <section class="section">
+                <h3>DIVISION PROFILE</h3>
+
+                <div class="grid">
+                    <div class="info">
+                        <strong>FOUNDATION</strong>
+                        2013
+                    </div>
+
+                    <div class="info">
+                        <strong>PARENT ORGANIZATION</strong>
+                        Metaphysical Sciences Department
+                    </div>
+
+                    <div class="info">
+                        <strong>PRIMARY FIELD</strong>
+                        Minecraft server anomalies
+                    </div>
+
+                    <div class="info">
+                        <strong>VERSION RANGE</strong>
+                        Modern, legacy, Alpha and Beta
+                    </div>
+
+                    <div class="info">
+                        <strong>ARCHIVE SCALE</strong>
+                        100+ files on many standard servers
+                    </div>
+
+                    <div class="info">
+                        <strong>RECORD STATUS</strong>
+                        Classified / ongoing
+                    </div>
+                </div>
+            </section>
+
+            <!-- DATABASE BUTTON -->
+
+            <div class="database-button-wrap">
+                <p>
+                    ADDITIONAL RECORDS ARE AVAILABLE IN THE ARCHIVE.
+                </p>
+
+                <button class="main-button" id="openDatabase">
+                    OPEN DATABASE FILES →
+                </button>
             </div>
-        </section>
 
-        <!-- ABOUT -->
+        </div>
 
-        <section class="section">
-            <h3>ABOUT THE DIVISION</h3>
+        <!-- DATABASE PAGE -->
 
-            <p>
-                <b>NULLPAD</b> is a classified subdivision of the
-                Metaphysical Sciences Department, established in
-                <b>2013</b> to investigate irregular phenomena occurring
-                within Minecraft environments.
-            </p>
+        <section class="section database-page" id="databasePage" hidden>
 
-            <p>
-                The division operates observation infrastructure across
-                multiplayer and private servers. Its research is not
-                limited to modern releases: legacy builds, experimental
-                versions, snapshots, Alpha and Beta environments are all
-                valid observation grounds. An anomaly does not become
-                irrelevant simply because the software is old.
-            </p>
-
-            <p>
-                NULLPAD documents unusual world behaviour, unexplained
-                terrain and chunk irregularities, broken or inconsistent
-                game mechanics, entities that appear not to belong to the
-                expected game environment, and events whose behaviour
-                cannot readily be explained by ordinary server activity.
-            </p>
-
-            <p>
-                Reports are treated as records, not conclusions.
-                Investigators preserve version details, server
-                identifiers, timestamps, observed behaviour and
-                repeatability notes wherever available. A strange
-                sighting may be a software fault, plugin interaction,
-                corrupted world state, player-created event—or an
-                unresolved case. The archive keeps these possibilities
-                separate until evidence supports a classification.
-            </p>
-
-            <p>
-                Each monitored server maintains its own file collection.
-                Standard archives may contain <b>100 or more records per
-                server</b>. Large, high-population or heavily documented
-                servers are handled differently: their activity is
-                indexed selectively, and files are created when a
-                distinct incident or meaningful pattern is identified.
-                A low incident count is not automatically evidence of a
-                quiet or safe environment.
-            </p>
-
-            <p>
-                NULLPAD's central purpose is to build a long-term
-                catalogue of the unexpected: what was observed, where
-                it occurred, which version was involved, and whether the
-                event could be reproduced. The division does not assume
-                every irregularity is paranormal, nor discard an event
-                solely because it seems impossible at first glance.
-            </p>
-
-            <p class="muted">
-                INTERNAL DIRECTIVE: Preserve original observations.
-                Avoid embellishment. Mark unverified interpretations
-                as provisional.
-            </p>
-        </section>
-
-        <!-- DIVISION PROFILE -->
-
-        <section class="section">
-            <h3>DIVISION PROFILE</h3>
-
-            <div class="grid">
-                <div class="info">
-                    <strong>FOUNDATION</strong>
-                    2013
-                </div>
-
-                <div class="info">
-                    <strong>PARENT ORGANIZATION</strong>
-                    Metaphysical Sciences Department
-                </div>
-
-                <div class="info">
-                    <strong>PRIMARY FIELD</strong>
-                    Minecraft server anomalies
-                </div>
-
-                <div class="info">
-                    <strong>VERSION RANGE</strong>
-                    Modern, legacy, Alpha and Beta
-                </div>
-
-                <div class="info">
-                    <strong>ARCHIVE SCALE</strong>
-                    100+ files on many standard servers
-                </div>
-
-                <div class="info">
-                    <strong>RECORD STATUS</strong>
-                    Classified / ongoing
-                </div>
-            </div>
-        </section>
-
-        <!-- DATABASE -->
-
-        <section class="section" id="database">
+            <button class="back" id="backHome">
+                ← BACK TO MAIN PAGE
+            </button>
 
             <div class="section-head">
                 <h3>DATABASE FILES</h3>
@@ -509,7 +604,7 @@ footer {
                 <a
                     class="file available"
                     href="#file-001"
-                    data-search="001 freshlike incident operation moon light m-108 server gaming rot-18"
+                    data-search="001 freshlike incident operation moon light m-108 server gaming rot-18 np qbvm"
                 >
                     <span>[001] FRESHLIKE INCIDENT</span>
                     <small>OPEN FILE ↗</small>
@@ -542,7 +637,7 @@ footer {
 
         <section class="view" id="file-001">
 
-            <button class="back" id="back">
+            <button class="back" id="backDatabase">
                 ← BACK TO DATABASE
             </button>
 
@@ -572,6 +667,51 @@ footer {
                 <div>ROT-18</div>
             </div>
 
+            <section class="section">
+                <h3>PROJECT NP_qbvm</h3>
+
+                <div class="subtitle">
+                    AGENT RECORD // INTERNAL DOCUMENT
+                </div>
+
+                <p>
+                    Project designation: <b>NP_qbvm</b>.
+                </p>
+
+                <p>
+                    NP_qbvm is assigned to the FreshLike observation
+                    initiative under the operational framework of
+                    NULLPAD. The agent's primary responsibility is
+                    to monitor irregular server activity, document
+                    unusual environmental behaviour, and preserve
+                    evidence of events that cannot be immediately
+                    attributed to ordinary gameplay.
+                </p>
+
+                <p>
+                    All observations must be recorded with available
+                    timestamps, location details, and relevant
+                    environmental conditions. Unverified information
+                    must remain marked as unconfirmed until additional
+                    evidence is obtained.
+                </p>
+
+                <p>
+                    The agent is not authorized to alter archived
+                    evidence or present assumptions as established
+                    findings. Any significant irregularity must be
+                    submitted for further review by the division.
+                </p>
+
+                <p class="muted">
+                    CURRENT STATUS: ACTIVE
+                    <br>
+                    ASSIGNMENT: FRESLIKE SERVER
+                    <br>
+                    CLEARANCE: INTERNAL
+                </p>
+            </section>
+
             <p class="notice" style="text-align:left; margin-top:16px">
                 DOCUMENT STATUS: INITIAL INDEX // FURTHER DETAILS
                 AWAITING AUTHORIZED ENTRY
@@ -586,16 +726,40 @@ footer {
         <footer>
             <span>NULLPAD © <span id="year"></span></span>
             <span>METAPHYSICAL SCIENCES DIVISION</span>
-            <span>BUILD 0.2</span>
+            <span>BUILD 0.3</span>
         </footer>
 
     </div>
 </main>
 
-<!-- JAVASCRIPT -->
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    // ========================================
+    // PASSWORD ROTATION
+    // ========================================
+
+    const accessCodes = [
+        'NP',
+        'MSD',
+        'NP_qbvm'
+    ];
+
+    let visit = Number(
+        localStorage.getItem('nullpad-visit') || 0
+    );
+
+    if (!Number.isSafeInteger(visit) || visit < 0) {
+        visit = 0;
+    }
+
+    const currentPassword =
+        accessCodes[visit % accessCodes.length];
+
+    localStorage.setItem(
+        'nullpad-visit',
+        String(visit + 1)
+    );
 
     // ========================================
     // AUTHENTICATION
@@ -607,23 +771,51 @@ document.addEventListener('DOMContentLoaded', function () {
     const password = document.getElementById('password');
     const error = document.getElementById('error');
 
-    // Every page load starts with the access screen.
-    gate.style.display = 'grid';
-    site.hidden = true;
-
     login.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        if (password.value === 'NP') {
-            gate.style.display = 'none';
-            site.hidden = false;
+        if (password.value === currentPassword) {
+
             error.textContent = '';
+            gate.classList.add('leaving');
+
+            site.hidden = false;
+            site.classList.add('entering');
+
+            setTimeout(function () {
+                gate.style.display = 'none';
+            }, 560);
+
         } else {
-            error.textContent = 'ACCESS DENIED // INVALID CODE';
+
+            error.textContent =
+                'ACCESS DENIED // INVALID CODE';
+
             password.value = '';
             password.focus();
         }
     });
+
+    // ========================================
+    // MAIN PAGE / DATABASE NAVIGATION
+    // ========================================
+
+    const homePage = document.getElementById('homePage');
+    const databasePage = document.getElementById('databasePage');
+    const openDatabase = document.getElementById('openDatabase');
+
+    openDatabase.addEventListener('click', function () {
+        homePage.hidden = true;
+        databasePage.hidden = false;
+        databasePage.classList.add('active');
+    });
+
+    document.getElementById('backHome')
+        .addEventListener('click', function () {
+            databasePage.hidden = true;
+            databasePage.classList.remove('active');
+            homePage.hidden = false;
+        });
 
     // ========================================
     // DATABASE SEARCH
@@ -647,21 +839,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             file.style.display = match ? 'flex' : 'none';
 
-            if (match) {
-                count++;
-            }
+            if (match) count++;
         });
 
         empty.style.display = count ? 'none' : 'block';
     });
 
     // ========================================
-    // FILE NAVIGATION
+    // FILE 001 NAVIGATION
     // ========================================
 
     const view = document.getElementById('file-001');
-    const section = document.getElementById('database');
-    const center = document.querySelector('.center');
 
     const fileLink = document.querySelector(
         'a[href="#file-001"]'
@@ -670,21 +858,16 @@ document.addEventListener('DOMContentLoaded', function () {
     fileLink.addEventListener('click', function (event) {
         event.preventDefault();
 
+        databasePage.hidden = true;
         view.classList.add('active');
-        section.style.display = 'none';
-        center.style.display = 'none';
-
-        history.replaceState(null, '', '#file-001');
     });
 
-    document.getElementById('back').addEventListener('click', function () {
-        view.classList.remove('active');
-
-        section.style.display = 'block';
-        center.style.display = 'block';
-
-        history.replaceState(null, '', location.pathname);
-    });
+    document.getElementById('backDatabase')
+        .addEventListener('click', function () {
+            view.classList.remove('active');
+            databasePage.hidden = false;
+            databasePage.classList.add('active');
+        });
 
     // ========================================
     // FOOTER
