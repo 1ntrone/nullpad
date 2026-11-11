@@ -1,883 +1,474 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NULLPAD — Metaphysical Sciences Division</title>
+<section class="view" id="file-001">
 
-<style>
-:root {
-    --bg: #070b09;
-    --panel: #101815;
-    --line: #35483e;
-    --muted: #91a69b;
-    --text: #dce9e1;
-    --green: #a8dfbd;
-    --red: #ff656d;
-}
+    <button class="back" id="backDatabase">
+        ← BACK TO DATABASE
+    </button>
 
-* {
-    box-sizing: border-box;
-}
+    <div class="subtitle">
+        FILE 001 // INCIDENT INVESTIGATION
+    </div>
 
-body {
-    margin: 0;
-    background: radial-gradient(ellipse at 50% -20%, #183326, transparent 52%), var(--bg);
-    color: var(--text);
-    font: 14px/1.6 "Courier New", monospace;
-}
+    <h2 style="color:var(--green)">
+        FRESHLIKE INCIDENT
+    </h2>
 
-button, input {
-    font: inherit;
-}
+    <div class="subtitle">
+        OPERATION MOON.LIGHT // RESTRICTED ARCHIVE
+    </div>
 
-.shell {
-    width: min(960px, calc(100% - 28px));
-    margin: 32px auto;
-}
+    <div class="record">
+        <div>Operation</div>
+        <div>MOON.LIGHT</div>
 
-.frame {
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--panel);
-    padding: clamp(16px, 3vw, 26px);
-    box-shadow: 0 18px 60px #0009;
-}
+        <div>Sector</div>
+        <div>M-108</div>
 
-.topline, footer {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    color: var(--muted);
-    font-size: 11px;
-}
+        <div>Server</div>
+        <div>FreshLike</div>
 
-.topline {
-    margin-bottom: 12px;
-}
+        <div>Server Address</div>
+        <div>freshlike.gaming</div>
 
-header {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-}
+        <div>Incident Code</div>
+        <div>ROT-18</div>
 
-h1 {
-    margin: 0;
-    color: #b8e7ca;
-    font-size: clamp(28px, 5vw, 40px);
-    letter-spacing: .08em;
-}
+        <div>Investigation Status</div>
+        <div style="color:var(--red)">ONGOING</div>
 
-.subtitle {
-    color: var(--muted);
-    font-size: 11px;
-    letter-spacing: .1em;
-}
+        <div>Threat Classification</div>
+        <div>UNDETERMINED</div>
 
-.pill {
-    border: 1px solid #714047;
-    background: #291518;
-    color: var(--red);
-    padding: 4px 9px;
-    font-size: 11px;
-}
+        <div>Assigned Division</div>
+        <div>NULLPAD</div>
+    </div>
 
-hr {
-    border: 0;
-    border-top: 1px solid #53665c;
-    margin: 20px 0;
-}
+    <!-- SECTION 01 -->
 
-.center {
-    text-align: center;
-}
+    <section class="section">
+        <h3>01 // INITIAL DISCOVERY</h3>
 
-.section {
-    border: 1px solid var(--line);
-    background: #0b120f;
-    padding: 16px;
-    margin-top: 18px;
-}
-
-.section h3 {
-    margin: 0 0 10px;
-    color: #cce7d6;
-    font-size: 15px;
-}
-
-p {
-    margin: 8px 0;
-}
-
-.muted {
-    color: var(--muted);
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.info {
-    border: 1px solid #293a31;
-    background: #0e1712;
-    padding: 12px;
-}
-
-.info strong {
-    display: block;
-    color: var(--green);
-    font-size: 12px;
-}
-
-.files {
-    display: grid;
-    gap: 8px;
-}
-
-.file {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 11px 12px;
-    background: #101916;
-    border: 1px solid transparent;
-    text-decoration: none;
-}
-
-.available {
-    color: var(--green);
-    border-color: #294d3a !important;
-}
-
-.available:hover {
-    background: #14251c;
-}
-
-.locked {
-    color: var(--red);
-    border-color: #522b30;
-    background: #1a1012;
-    opacity: .88;
-}
-
-.file small {
-    color: var(--muted);
-    font-size: 10px;
-}
-
-.search {
-    width: min(300px, 100%);
-    background: #070c0a;
-    color: var(--text);
-    border: 1px solid #40544a;
-    padding: 9px;
-}
-
-.section-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-
-.view {
-    display: none;
-    margin-top: 18px;
-    border: 1px solid #40584a;
-    background: #0a100d;
-    padding: 18px;
-}
-
-.view.active {
-    display: block;
-}
-
-.record {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    border: 1px solid #34483c;
-    margin-top: 16px;
-}
-
-.record div {
-    padding: 10px;
-    border-bottom: 1px solid #26372e;
-}
-
-.record div:nth-child(odd) {
-    color: var(--muted);
-    background: #0e1712;
-}
-
-.record div:nth-last-child(-n+2) {
-    border-bottom: 0;
-}
-
-.notice, .empty {
-    text-align: center;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.empty {
-    display: none;
-    padding: 12px;
-}
-
-footer {
-    margin-top: 18px;
-}
-
-/* BUTTONS */
-
-.main-button, .back {
-    border: 1px solid #4b936a;
-    background: #173324;
-    color: #c5f0d5;
-    padding: 12px 18px;
-    cursor: pointer;
-    letter-spacing: .08em;
-    transition: background .2s, border-color .2s, transform .2s;
-}
-
-.main-button:hover, .back:hover {
-    background: #20452f;
-    border-color: var(--green);
-    transform: translateY(-2px);
-}
-
-.database-button-wrap {
-    text-align: center;
-    margin-top: 28px;
-    padding-top: 20px;
-    border-top: 1px solid var(--line);
-}
-
-.database-button-wrap p {
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.back {
-    margin-bottom: 15px;
-    padding: 7px 11px;
-}
-
-/* ACCESS SCREEN */
-
-#gate {
-    position: fixed;
-    inset: 0;
-    z-index: 5;
-    background: radial-gradient(ellipse at 50% 20%, #142b20, #050806 65%);
-    display: grid;
-    place-items: center;
-    padding: 18px;
-    opacity: 1;
-}
-
-.gatebox {
-    width: min(440px, 100%);
-    background: #0d1511;
-    border: 1px solid #42584b;
-    padding: 25px;
-    box-shadow: 0 20px 80px #000b;
-}
-
-.gatebox h2 {
-    margin: 0;
-    color: #b8e7ca;
-    letter-spacing: .1em;
-    font-size: 25px;
-}
-
-.gatebox input {
-    width: 100%;
-    margin: 14px 0 9px;
-    padding: 12px;
-    background: #050907;
-    border: 1px solid #52675b;
-    color: var(--text);
-}
-
-.gatebox button {
-    width: 100%;
-    padding: 11px;
-    background: #173324;
-    color: #c5f0d5;
-    border: 1px solid #4b936a;
-    cursor: pointer;
-}
-
-.gatebox button:hover {
-    background: #20452f;
-}
-
-.error {
-    color: var(--red);
-    min-height: 20px;
-    font-size: 11px;
-}
-
-/* ANIMATIONS */
-
-#gate.leaving {
-    animation: gateFade .55s ease forwards;
-}
-
-#site[hidden] {
-    display: none;
-}
-
-#site.entering {
-    animation: siteReveal .85s ease both;
-}
-
-@keyframes gateFade {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: scale(1.025);
-        visibility: hidden;
-    }
-}
-
-@keyframes siteReveal {
-    from {
-        opacity: 0;
-        transform: translateY(18px);
-        filter: blur(5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-        filter: blur(0);
-    }
-}
-
-@keyframes sectionReveal {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.database-page.active,
-.view.active {
-    animation: sectionReveal .35s ease both;
-}
-
-@media (max-width: 620px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
-
-    .section-head {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .record {
-        grid-template-columns: 105px 1fr;
-    }
-}
-</style>
-</head>
-
-<body>
-
-<!-- ACCESS GATE -->
-
-<div id="gate">
-    <div class="gatebox">
-        <div class="subtitle">
-            METAPHYSICAL SCIENCES DIVISION // SECURE ACCESS NODE
-        </div>
-
-        <h2>NULLPAD</h2>
-
-        <p class="muted">
-            IDENTITY CHECK REQUIRED. ENTER ARCHIVE ACCESS CODE.
+        <p>
+            The FreshLike server was added to the NULLPAD
+            observation network following reports of unusual
+            environmental behaviour and unexplained player
+            experiences.
         </p>
 
-        <form id="login">
-            <label class="subtitle" for="password">ACCESS CODE</label>
+        <p>
+            Initial monitoring did not reveal a single consistent
+            source of irregular activity. Instead, several
+            unrelated incidents began appearing across different
+            locations and gameplay sessions.
+        </p>
 
-            <input
-                id="password"
-                type="password"
-                placeholder="••••••"
-                autocomplete="off"
-                required
-            >
+        <p>
+            Investigators identified recurring irregularities
+            involving unexplained footsteps, unstable village
+            generation, and the sudden disappearance of terrain
+            chunks.
+        </p>
 
-            <button type="submit">AUTHENTICATE</button>
-            <div id="error" class="error"></div>
-        </form>
+        <p>
+            These incidents were initially considered possible
+            technical faults. However, their repeated occurrence
+            and the similarity between independent player reports
+            resulted in the opening of a dedicated investigation.
+        </p>
 
-        <div class="subtitle">
-            UNAUTHORIZED ACCESS IS PROHIBITED
-        </div>
-    </div>
-</div>
+        <p class="muted">
+            INITIAL ASSESSMENT: MULTIPLE UNRELATED ANOMALIES
+            MAY SHARE A COMMON ORIGIN. UNCONFIRMED.
+        </p>
+    </section>
 
-<!-- MAIN WEBSITE -->
+    <!-- SECTION 02 -->
 
-<main class="shell" id="site" hidden>
+    <section class="section">
+        <h3>02 // OBSERVED ANOMALOUS ACTIVITY</h3>
 
-    <div class="topline">
-        <span>NULLPAD NETWORK // INTERNAL ARCHIVE</span>
-        <span class="pill">● CLASSIFIED</span>
-    </div>
+        <h4 style="color:var(--green)">
+            A. UNIDENTIFIED FOOTSTEP SOUNDS
+        </h4>
 
-    <div class="frame">
+        <p>
+            Multiple observations describe footsteps occurring
+            underground, particularly inside caves and enclosed
+            underground passages.
+        </p>
 
-        <header>
-            <div>
-                <h1>NULLPAD</h1>
-                <div class="subtitle">METAPHYSICAL SCIENCES DIVISION</div>
-            </div>
-            <span class="pill">RESTRICTED</span>
-        </header>
+        <p>
+            In several reports, the sounds appeared to occur near
+            active players despite no other player being visibly
+            present in the immediate area.
+        </p>
+
+        <p>
+            Some witnesses reported hearing movement behind them
+            or nearby, followed by an absence of any identifiable
+            entity.
+        </p>
+
+        <p>
+            The source of these sounds remains unidentified.
+            Investigators have not established whether the
+            phenomenon is connected to ordinary game audio,
+            server-side activity, or another unresolved cause.
+        </p>
 
         <hr>
 
-        <div id="homePage">
+        <h4 style="color:var(--green)">
+            B. UNSTABLE VILLAGE GENERATION
+        </h4>
 
-            <section class="center">
-                <h2>RESTRICTED DATABASE</h2>
-                <div class="subtitle">
-                    ARCHIVE ACCESS INTERFACE // EST. 2013
-                </div>
-            </section>
-
-            <!-- ABOUT -->
-
-            <section class="section">
-                <h3>ABOUT THE DIVISION</h3>
-
-                <p>
-                    <b>NULLPAD</b> is a classified subdivision of the
-                    Metaphysical Sciences Department, established in
-                    <b>2013</b> to investigate irregular phenomena occurring
-                    within Minecraft environments.
-                </p>
-
-                <p>
-                    The division operates observation infrastructure
-                    across multiplayer and private servers. Its research
-                    is not limited to modern releases: legacy builds,
-                    experimental versions, snapshots, Alpha and Beta
-                    environments are all valid observation grounds.
-                    An anomaly does not become irrelevant simply because
-                    the software is old.
-                </p>
-
-                <p>
-                    NULLPAD documents unusual world behaviour,
-                    unexplained terrain and chunk irregularities,
-                    broken or inconsistent game mechanics, entities
-                    that appear not to belong to the expected game
-                    environment, and events whose behaviour cannot
-                    readily be explained by ordinary server activity.
-                </p>
-
-                <p>
-                    Reports are treated as records, not conclusions.
-                    Investigators preserve version details, server
-                    identifiers, timestamps, observed behaviour and
-                    repeatability notes wherever available. A strange
-                    sighting may be a software fault, plugin interaction,
-                    corrupted world state, player-created event—or an
-                    unresolved case.
-                </p>
-
-                <p>
-                    Each monitored server maintains its own file
-                    collection. Standard archives may contain
-                    <b>100 or more records per server</b>. Large,
-                    high-population or heavily documented servers are
-                    handled differently: their activity is indexed
-                    selectively, and files are created when a distinct
-                    incident or meaningful pattern is identified.
-                </p>
-
-                <p>
-                    NULLPAD's central purpose is to build a long-term
-                    catalogue of the unexpected: what was observed,
-                    where it occurred, which version was involved,
-                    and whether the event could be reproduced.
-                </p>
-
-                <p class="muted">
-                    INTERNAL DIRECTIVE: Preserve original observations.
-                    Avoid embellishment. Mark unverified interpretations
-                    as provisional.
-                </p>
-            </section>
-
-            <!-- PROFILE -->
-
-            <section class="section">
-                <h3>DIVISION PROFILE</h3>
-
-                <div class="grid">
-                    <div class="info">
-                        <strong>FOUNDATION</strong>
-                        2013
-                    </div>
-
-                    <div class="info">
-                        <strong>PARENT ORGANIZATION</strong>
-                        Metaphysical Sciences Department
-                    </div>
-
-                    <div class="info">
-                        <strong>PRIMARY FIELD</strong>
-                        Minecraft server anomalies
-                    </div>
-
-                    <div class="info">
-                        <strong>VERSION RANGE</strong>
-                        Modern, legacy, Alpha and Beta
-                    </div>
-
-                    <div class="info">
-                        <strong>ARCHIVE SCALE</strong>
-                        100+ files on many standard servers
-                    </div>
-
-                    <div class="info">
-                        <strong>RECORD STATUS</strong>
-                        Classified / ongoing
-                    </div>
-                </div>
-            </section>
-
-            <!-- DATABASE BUTTON -->
-
-            <div class="database-button-wrap">
-                <p>
-                    ADDITIONAL RECORDS ARE AVAILABLE IN THE ARCHIVE.
-                </p>
-
-                <button class="main-button" id="openDatabase">
-                    OPEN DATABASE FILES →
-                </button>
-            </div>
-
-        </div>
-
-        <!-- DATABASE PAGE -->
-
-        <section class="section database-page" id="databasePage" hidden>
-
-            <button class="back" id="backHome">
-                ← BACK TO MAIN PAGE
-            </button>
-
-            <div class="section-head">
-                <h3>DATABASE FILES</h3>
-
-                <input
-                    id="search"
-                    class="search"
-                    type="search"
-                    placeholder="Search archive..."
-                >
-            </div>
-
-            <div class="files" id="files">
-
-                <a
-                    class="file available"
-                    href="#file-001"
-                    data-search="001 freshlike incident operation moon light m-108 server gaming rot-18 np qbvm"
-                >
-                    <span>[001] FRESHLIKE INCIDENT</span>
-                    <small>OPEN FILE ↗</small>
-                </a>
-
-                <div class="file locked" data-search="002 anomaly reports">
-                    <span>[002] ANOMALY REPORTS</span>
-                    <small>ACCESS DENIED</small>
-                </div>
-
-                <div class="file locked" data-search="003 human research">
-                    <span>[003] HUMAN RESEARCH</span>
-                    <small>ACCESS DENIED</small>
-                </div>
-
-                <div class="file locked" data-search="004 agent records">
-                    <span>[004] AGENT RECORDS</span>
-                    <small>ACCESS DENIED</small>
-                </div>
-
-            </div>
-
-            <div class="empty" id="empty">
-                NO MATCHING RECORDS FOUND
-            </div>
-
-        </section>
-
-        <!-- FILE 001 -->
-
-        <section class="view" id="file-001">
-
-            <button class="back" id="backDatabase">
-                ← BACK TO DATABASE
-            </button>
-
-            <div class="subtitle">
-                FILE 001 // INCIDENT RECORD
-            </div>
-
-            <h2 style="color:var(--green)">
-                FRESHLIKE INCIDENT
-            </h2>
-
-            <div class="subtitle">
-                OPERATIONAL INDEX // RESTRICTED
-            </div>
-
-            <div class="record">
-                <div>Operation</div>
-                <div>MOON.LIGHT</div>
-
-                <div>Sector</div>
-                <div>M-108</div>
-
-                <div>IP Server</div>
-                <div>freshlike.gaming</div>
-
-                <div>Code</div>
-                <div>ROT-18</div>
-            </div>
-
-            <section class="section">
-                <h3>PROJECT NP_qbvm</h3>
-
-                <div class="subtitle">
-                    AGENT RECORD // INTERNAL DOCUMENT
-                </div>
-
-                <p>
-                    Project designation: <b>NP_qbvm</b>.
-                </p>
-
-                <p>
-                    NP_qbvm is assigned to the FreshLike observation
-                    initiative under the operational framework of
-                    NULLPAD. The agent's primary responsibility is
-                    to monitor irregular server activity, document
-                    unusual environmental behaviour, and preserve
-                    evidence of events that cannot be immediately
-                    attributed to ordinary gameplay.
-                </p>
-
-                <p>
-                    All observations must be recorded with available
-                    timestamps, location details, and relevant
-                    environmental conditions. Unverified information
-                    must remain marked as unconfirmed until additional
-                    evidence is obtained.
-                </p>
-
-                <p>
-                    The agent is not authorized to alter archived
-                    evidence or present assumptions as established
-                    findings. Any significant irregularity must be
-                    submitted for further review by the division.
-                </p>
-
-                <p class="muted">
-                    CURRENT STATUS: ACTIVE
-                    <br>
-                    ASSIGNMENT: FRESLIKE SERVER
-                    <br>
-                    CLEARANCE: INTERNAL
-                </p>
-            </section>
-
-            <p class="notice" style="text-align:left; margin-top:16px">
-                DOCUMENT STATUS: INITIAL INDEX // FURTHER DETAILS
-                AWAITING AUTHORIZED ENTRY
-            </p>
-
-        </section>
-
-        <p class="notice">
-            UNAUTHORIZED ACCESS IS PROHIBITED
+        <p>
+            Villages have occasionally been observed generating
+            in inconsistent or incomplete configurations.
         </p>
 
-        <footer>
-            <span>NULLPAD © <span id="year"></span></span>
-            <span>METAPHYSICAL SCIENCES DIVISION</span>
-            <span>BUILD 0.3</span>
-        </footer>
+        <p>
+            Reported irregularities include unusual building
+            placement, missing structures, incomplete village
+            layouts, and generation patterns that appear
+            inconsistent with surrounding terrain.
+        </p>
 
-    </div>
-</main>
+        <p>
+            Not every affected village displays the same
+            characteristics. The division has therefore
+            classified these events as a recurring generation
+            irregularity rather than a single confirmed anomaly.
+        </p>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+        <hr>
 
-    // ========================================
-    // PASSWORD ROTATION
-    // ========================================
+        <h4 style="color:var(--green)">
+            C. UNEXPLAINED CHUNK DISAPPEARANCE
+        </h4>
 
-    const accessCodes = [
-        'NP',
-        'MSD',
-        'NP_qbvm'
-    ];
+        <p>
+            One of the more significant incidents involves
+            terrain chunks disappearing without an identified
+            player action.
+        </p>
 
-    let visit = Number(
-        localStorage.getItem('nullpad-visit') || 0
-    );
+        <p>
+            Witnesses describe areas of the world becoming
+            inaccessible or visually absent, sometimes
+            appearing different after returning to the location.
+        </p>
 
-    if (!Number.isSafeInteger(visit) || visit < 0) {
-        visit = 0;
-    }
+        <p>
+            The division has not established whether these
+            incidents represent corrupted world data, rendering
+            faults, incomplete loading, or a separate phenomenon.
+        </p>
 
-    const currentPassword =
-        accessCodes[visit % accessCodes.length];
+        <p>
+            All reports involving missing terrain are to be
+            preserved with location information and available
+            timestamps.
+        </p>
 
-    localStorage.setItem(
-        'nullpad-visit',
-        String(visit + 1)
-    );
+        <p class="muted">
+            NOTE: NO SINGLE TECHNICAL EXPLANATION HAS BEEN
+            CONFIRMED FOR ALL THREE CATEGORIES.
+        </p>
+    </section>
 
-    // ========================================
-    // AUTHENTICATION
-    // ========================================
+    <!-- SECTION 03 -->
 
-    const gate = document.getElementById('gate');
-    const site = document.getElementById('site');
-    const login = document.getElementById('login');
-    const password = document.getElementById('password');
-    const error = document.getElementById('error');
+    <section class="section">
+        <h3>03 // CIVILIAN REPORT</h3>
 
-    login.addEventListener('submit', function (event) {
-        event.preventDefault();
+        <div class="subtitle">
+            SOURCE: FRESHLlKE PLAYER // IDENTITY REDACTED
+        </div>
 
-        if (password.value === currentPassword) {
+        <p>
+            An unidentified player submitted a report describing
+            unusual activity experienced during a regular
+            gameplay session.
+        </p>
 
-            error.textContent = '';
-            gate.classList.add('leaving');
+        <p>
+            The submitted report contained observations
+            concerning unexplained sounds and irregular
+            environmental behaviour.
+        </p>
 
-            site.hidden = false;
-            site.classList.add('entering');
+        <p>
+            The player's username and identifying information
+            have been removed from this document.
+        </p>
 
-            setTimeout(function () {
-                gate.style.display = 'none';
-            }, 560);
+        <p>
+            The original submission has been retained in the
+            internal archive. Its contents are currently
+            considered unverified testimony and are not treated
+            as direct confirmation of an anomaly.
+        </p>
 
-        } else {
+        <div class="record">
+            <div>Reporter</div>
+            <div>[REDACTED]</div>
 
-            error.textContent =
-                'ACCESS DENIED // INVALID CODE';
+            <div>Origin</div>
+            <div>FreshLike Server</div>
 
-            password.value = '';
-            password.focus();
-        }
-    });
+            <div>Report Type</div>
+            <div>Player Submission</div>
 
-    // ========================================
-    // MAIN PAGE / DATABASE NAVIGATION
-    // ========================================
+            <div>Verification</div>
+            <div style="color:var(--red)">PENDING</div>
 
-    const homePage = document.getElementById('homePage');
-    const databasePage = document.getElementById('databasePage');
-    const openDatabase = document.getElementById('openDatabase');
+            <div>Identity Status</div>
+            <div>WITHHELD</div>
+        </div>
 
-    openDatabase.addEventListener('click', function () {
-        homePage.hidden = true;
-        databasePage.hidden = false;
-        databasePage.classList.add('active');
-    });
+        <p class="muted">
+            ARCHIVE DIRECTIVE: DO NOT ATTEMPT TO IDENTIFY
+            THE ORIGINAL REPORTER WITHOUT AUTHORIZATION.
+        </p>
+    </section>
 
-    document.getElementById('backHome')
-        .addEventListener('click', function () {
-            databasePage.hidden = true;
-            databasePage.classList.remove('active');
-            homePage.hidden = false;
-        });
+    <!-- SECTION 04 -->
 
-    // ========================================
-    // DATABASE SEARCH
-    // ========================================
+    <section class="section">
+        <h3>04 // PROJECT NP_qbvm</h3>
 
-    const search = document.getElementById('search');
+        <div class="subtitle">
+            PROJECT LEAD // CLEARANCE CLASS D
+        </div>
 
-    const files = [
-        ...document.querySelectorAll('#files .file')
-    ];
+        <p>
+            <b>NP_qbvm</b> is the designated project lead for
+            the FreshLike investigation.
+        </p>
 
-    const empty = document.getElementById('empty');
+        <p>
+            The agent is responsible for coordinating routine
+            observations, maintaining the investigation's
+            working records, and organizing information
+            collected during monitoring sessions.
+        </p>
 
-    search.addEventListener('input', function () {
-        let count = 0;
+        <p>
+            NP_qbvm primarily operates as a regular player
+            within the server environment. This allows the
+            agent to observe events under ordinary gameplay
+            conditions without relying exclusively on external
+            monitoring.
+        </p>
 
-        files.forEach(function (file) {
-            const match = file.dataset.search.includes(
-                search.value.trim().toLowerCase()
-            );
+        <p>
+            The agent is expected to document unusual
+            environmental behaviour, compare independent
+            observations, and maintain a record of unresolved
+            incidents.
+        </p>
 
-            file.style.display = match ? 'flex' : 'none';
+        <p>
+            Project leadership at Class D does not grant
+            authority over higher-clearance personnel.
+            The agent's responsibilities are limited to
+            the operational scope of this investigation.
+        </p>
 
-            if (match) count++;
-        });
+        <div class="record">
+            <div>Agent ID</div>
+            <div>NP_qbvm</div>
 
-        empty.style.display = count ? 'none' : 'block';
-    });
+            <div>Position</div>
+            <div>Project Lead</div>
 
-    // ========================================
-    // FILE 001 NAVIGATION
-    // ========================================
+            <div>Clearance</div>
+            <div>CLASS D</div>
 
-    const view = document.getElementById('file-001');
+            <div>Assignment</div>
+            <div>FreshLike Investigation</div>
 
-    const fileLink = document.querySelector(
-        'a[href="#file-001"]'
-    );
+            <div>Status</div>
+            <div style="color:var(--green)">ACTIVE</div>
+        </div>
+    </section>
 
-    fileLink.addEventListener('click', function (event) {
-        event.preventDefault();
+    <!-- SECTION 05 -->
 
-        databasePage.hidden = true;
-        view.classList.add('active');
-    });
+    <section class="section">
+        <h3>05 // AGENT NP_zht</h3>
 
-    document.getElementById('backDatabase')
-        .addEventListener('click', function () {
-            view.classList.remove('active');
-            databasePage.hidden = false;
-            databasePage.classList.add('active');
-        });
+        <div class="subtitle">
+            FIELD OBSERVER // CLEARANCE CLASS D
+        </div>
 
-    // ========================================
-    // FOOTER
-    // ========================================
+        <p>
+            <b>NP_zht</b> is assigned to the FreshLike
+            investigation as a secondary field observer
+            and report contributor.
+        </p>
 
-    document.getElementById('year').textContent =
-        new Date().getFullYear();
+        <p>
+            Unlike a purely observational role, NP_zht
+            attempts to maintain an ordinary and active
+            player presence within the server.
+        </p>
 
-});
-</script>
+        <p>
+            The agent participates in regular gameplay,
+            communicates with other players, and makes
+            discreet inquiries regarding unusual experiences
+            or unexplained server behaviour.
+        </p>
 
-</body>
-</html>
+        <p>
+            NP_zht also collects player statements and
+            submits written reports to the project archive.
+            Particular attention is given to accounts
+            involving unusual sounds, missing terrain,
+            inconsistent structures, and unexplained
+            activity near other players.
+        </p>
+
+        <p>
+            All collected statements must be distinguished
+            from independently verified observations.
+            The agent is not authorized to present rumours
+            as confirmed findings.
+        </p>
+
+        <div class="record">
+            <div>Agent ID</div>
+            <div>NP_zht</div>
+
+            <div>Position</div>
+            <div>Field Observer / Report Contributor</div>
+
+            <div>Clearance</div>
+            <div>CLASS D</div>
+
+            <div>Primary Activity</div>
+            <div>Player Interaction / Reporting</div>
+
+            <div>Status</div>
+            <div style="color:var(--green)">ACTIVE</div>
+        </div>
+    </section>
+
+    <!-- SECTION 06 -->
+
+    <section class="section">
+        <h3>06 // CLASS A PERSONNEL</h3>
+
+        <div class="subtitle">
+            RESTRICTED PERSONNEL INDEX
+        </div>
+
+        <p>
+            The FreshLike operation is also associated with
+            two additional personnel designations:
+            <b>NP_mvpg</b> and <b>test</b>.
+        </p>
+
+        <p>
+            Both designations are classified as
+            <b>Clearance Class A</b>.
+        </p>
+
+        <p>
+            Class A personnel possess a higher clearance
+            classification than the Class D agents listed
+            in this document.
+        </p>
+
+        <p>
+            Their authority is not subordinate to the
+            project lead or the secondary field observer.
+            Their exact responsibilities, operational
+            positions, and involvement in the FreshLike
+            investigation are not disclosed in this file.
+        </p>
+
+        <p>
+            No additional personnel records are available
+            within the current archive entry.
+        </p>
+
+        <div class="record">
+            <div>Designation</div>
+            <div>NP_mvpg</div>
+
+            <div>Clearance</div>
+            <div>CLASS A</div>
+
+            <div>Designation</div>
+            <div>test</div>
+
+            <div>Clearance</div>
+            <div>CLASS A</div>
+
+            <div>Information</div>
+            <div style="color:var(--red)">RESTRICTED</div>
+        </div>
+
+        <p class="muted">
+            ACCESS NOTE: CLASS A PERSONNEL RECORDS ARE NOT
+            INCLUDED IN THIS CLASS D INVESTIGATION FILE.
+            FURTHER INFORMATION IS UNAVAILABLE.
+        </p>
+    </section>
+
+    <!-- SECTION 07 -->
+
+    <section class="section">
+        <h3>07 // INVESTIGATION STATUS</h3>
+
+        <p>
+            The FreshLike investigation remains active.
+            The division continues to collect player reports,
+            monitor unusual environmental behaviour, and
+            compare incidents across separate sessions.
+        </p>
+
+        <p>
+            No definitive explanation has been established
+            for the reported footsteps, unstable village
+            generation, or disappearing chunks.
+        </p>
+
+        <p>
+            The available evidence is insufficient to
+            establish whether these incidents share a
+            common origin.
+        </p>
+
+        <div class="record">
+            <div>Footstep Reports</div>
+            <div style="color:var(--red)">UNRESOLVED</div>
+
+            <div>Village Irregularities</div>
+            <div style="color:var(--red)">UNRESOLVED</div>
+
+            <div>Missing Chunks</div>
+            <div style="color:var(--red)">UNRESOLVED</div>
+
+            <div>Player Report</div>
+            <div>UNDER REVIEW</div>
+
+            <div>Overall Status</div>
+            <div style="color:var(--green)">INVESTIGATION ACTIVE</div>
+        </div>
+
+        <p class="muted">
+            FINAL DIRECTIVE: CONTINUE OBSERVATION.
+            PRESERVE ALL ORIGINAL REPORTS.
+            DO NOT ASSUME A COMMON CAUSE WITHOUT EVIDENCE.
+        </p>
+    </section>
+
+    <p class="notice" style="margin-top:18px">
+        END OF AVAILABLE FILE 001 // NULLPAD INTERNAL ARCHIVE
+    </p>
+
+</section>
