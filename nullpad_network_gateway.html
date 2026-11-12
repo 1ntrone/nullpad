@@ -3,659 +3,775 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NULLPAD // TERMINAL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NULLPAD // NG-001</title>
 
 <style>
 :root {
-    --bg: #030604;
-    --green: #42ff82;
-    --dim: #52745c;
-    --text: #b8cbbd;
-    --red: #ff4545;
-    --border: #173321;
+    --bg:#020503;
+    --panel:#050b06;
+    --green:#48ff83;
+    --green2:#a1ffb8;
+    --dim:#477653;
+    --border:#174526;
+    --red:#ff5555;
+    --text:#b5d4bd;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing:border-box; }
+
+html { scroll-behavior:smooth; }
 
 body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Consolas, "Courier New", monospace;
-    font-size: 13px;
-    overflow-x: hidden;
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13px;
+    line-height:1.8;
+    overflow-x:hidden;
 }
 
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 5;
-    background: repeating-linear-gradient(
+body:before {
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:20;
+    background:repeating-linear-gradient(
         transparent 0px,
         transparent 3px,
-        rgba(0,0,0,.13) 4px
+        rgba(0,0,0,.16) 4px
     );
 }
 
-#terminal {
-    width: min(1050px, 94%);
-    margin: 35px auto;
-    min-height: calc(100vh - 70px);
-    border: 1px solid var(--border);
-    background: rgba(5,12,7,.96);
-    box-shadow: 0 0 35px rgba(66,255,130,.035);
-    display: flex;
-    flex-direction: column;
+body:after {
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:19;
+    box-shadow:inset 0 0 100px rgba(0,0,0,.7);
 }
 
-.topbar {
-    padding: 13px 18px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    color: var(--dim);
-    font-size: 10px;
-    letter-spacing: 2px;
+::selection {
+    background:var(--green);
+    color:#000;
 }
 
-.logo {
-    color: var(--green);
-    font-weight: bold;
-    letter-spacing: 4px;
+#boot {
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:#020503;
+    padding:35px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:opacity .8s;
 }
 
-#screen {
-    padding: 25px;
-    flex: 1;
-    overflow-wrap: anywhere;
+.boot-content {
+    width:min(600px,100%);
 }
 
-.line {
-    line-height: 1.8;
-    white-space: pre-wrap;
-    margin-bottom: 3px;
+.boot-logo {
+    font-size:34px;
+    color:var(--green);
+    letter-spacing:9px;
+    font-weight:bold;
+    margin-bottom:5px;
 }
 
-.green { color: var(--green); }
-.dim { color: var(--dim); }
-.red { color: var(--red); }
-.white { color: #e1eee4; }
+.boot-sub {
+    color:var(--dim);
+    font-size:10px;
+    letter-spacing:3px;
+    margin-bottom:30px;
+}
+
+#boot-log {
+    color:var(--green);
+    font-size:12px;
+    line-height:2;
+    white-space:pre-wrap;
+}
+
+.boot-progress {
+    width:100%;
+    height:3px;
+    background:#102516;
+    margin-top:25px;
+}
+
+#progress {
+    width:0%;
+    height:100%;
+    background:var(--green);
+    box-shadow:0 0 12px var(--green);
+    transition:width .2s;
+}
+
+#interface {
+    opacity:0;
+    transition:opacity 1s;
+}
+
+header {
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:rgba(2,6,3,.96);
+    border-bottom:1px solid var(--border);
+    padding:13px 5%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    backdrop-filter:blur(8px);
+}
+
+.brand {
+    color:var(--green);
+    font-size:21px;
+    font-weight:bold;
+    letter-spacing:6px;
+    text-shadow:0 0 12px rgba(72,255,131,.3);
+}
+
+.header-sub {
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:2px;
+}
+
+.status {
+    color:var(--green);
+    font-size:10px;
+    letter-spacing:2px;
+}
+
+.dot {
+    display:inline-block;
+    width:7px;
+    height:7px;
+    background:var(--green);
+    border-radius:50%;
+    margin-right:8px;
+    box-shadow:0 0 10px var(--green);
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    50% { opacity:.3; }
+}
+
+main {
+    width:min(1050px,90%);
+    margin:45px auto 80px;
+}
+
+.terminal-label {
+    color:var(--dim);
+    font-size:10px;
+    letter-spacing:3px;
+    margin-bottom:12px;
+}
+
+h1 {
+    color:var(--green);
+    font-size:clamp(28px,5vw,43px);
+    line-height:1.2;
+    letter-spacing:3px;
+    margin:0 0 12px;
+    text-shadow:0 0 15px rgba(72,255,131,.2);
+}
+
+h2 {
+    color:var(--green);
+    font-size:13px;
+    letter-spacing:3px;
+    font-weight:normal;
+    margin:45px 0 20px;
+    padding:12px 0;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+}
+
+h3 {
+    color:var(--green2);
+    font-size:12px;
+    letter-spacing:2px;
+    font-weight:normal;
+    margin:0 0 13px;
+}
+
+p {
+    margin:10px 0;
+    line-height:1.9;
+}
+
+.muted { color:var(--dim); }
+.green { color:var(--green); }
+.red { color:var(--red); }
+
+.intro {
+    color:var(--dim);
+    font-size:12px;
+    letter-spacing:1px;
+    margin-bottom:25px;
+}
 
 .separator {
-    color: #24412c;
+    color:#285536;
+    overflow:hidden;
+    white-space:nowrap;
+    margin:18px 0;
 }
 
-.command-line {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin-top: 8px;
-    padding: 12px 18px;
-    border-top: 1px solid var(--border);
+.system-message {
+    background:#061008;
+    border-left:2px solid var(--green);
+    padding:15px 18px;
+    margin:25px 0;
+    color:var(--text);
+    font-size:12px;
+    line-height:2;
 }
 
-.prompt {
-    color: var(--green);
-    white-space: nowrap;
+.panel {
+    border:1px solid var(--border);
+    background:rgba(5,12,7,.8);
+    margin:22px 0;
+    padding:20px;
 }
 
-#command {
-    flex: 1;
-    min-width: 0;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--green);
-    font: inherit;
-    caret-color: var(--green);
+.panel-heading {
+    color:var(--green);
+    font-size:11px;
+    letter-spacing:3px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:12px;
+    margin-bottom:18px;
 }
 
-#command::placeholder {
-    color: #36513d;
+.grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:10px;
 }
 
-.footer {
-    padding: 10px 18px;
-    border-top: 1px solid var(--border);
-    color: #3d5544;
-    font-size: 9px;
-    letter-spacing: 2px;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
+.data {
+    padding:13px;
+    background:#030805;
+    border:1px solid #142b1b;
+    min-width:0;
+}
+
+.data-label {
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:2px;
+    margin-bottom:7px;
+}
+
+.data-value {
+    color:var(--green);
+    font-size:12px;
+    overflow-wrap:anywhere;
+}
+
+.project {
+    padding:17px;
+    border:1px solid var(--border);
+    background:#030805;
+}
+
+.project-id {
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:2px;
+    margin-bottom:10px;
+}
+
+.project-name {
+    color:var(--green);
+    font-size:15px;
+    margin-bottom:5px;
+}
+
+.project-status {
+    color:var(--green);
+    font-size:10px;
+    margin:12px 0;
+}
+
+.project-description {
+    color:#8eae97;
+    font-size:11px;
+    line-height:1.9;
+}
+
+.record {
+    margin:35px 0;
+}
+
+.record p {
+    color:#a8c3af;
+    font-size:12px;
+}
+
+.directive {
+    border:1px solid var(--border);
+    padding:15px 18px;
+    margin:25px 0;
+    color:var(--green2);
+    background:#040b06;
+    font-size:11px;
+    letter-spacing:.4px;
+}
+
+.profile {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    border-top:1px solid var(--border);
+    border-left:1px solid var(--border);
+}
+
+.profile-item {
+    padding:17px;
+    border-right:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+}
+
+.profile-label {
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:2px;
+    margin-bottom:9px;
+}
+
+.profile-value {
+    color:var(--green);
+    font-size:12px;
+}
+
+footer {
+    border-top:1px solid var(--border);
+    padding:20px 5%;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    color:#45604b;
+    font-size:9px;
+    letter-spacing:2px;
 }
 
 .cursor {
-    display: inline-block;
-    width: 7px;
-    height: 13px;
-    background: var(--green);
-    vertical-align: middle;
-    animation: blink 1s steps(2) infinite;
+    display:inline-block;
+    width:7px;
+    height:13px;
+    background:var(--green);
+    vertical-align:middle;
+    animation:blink 1s steps(2) infinite;
 }
 
 @keyframes blink {
-    50% { opacity: 0; }
-}
-
-@keyframes appear {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-#screen .line {
-    animation: appear .15s ease;
+    50% { opacity:0; }
 }
 
 @media(max-width:600px) {
-    #terminal {
-        width: 100%;
-        margin: 0;
-        min-height: 100vh;
-        border: none;
-    }
+    header { padding:12px 5%; }
+    main { width:92%; margin-top:30px; }
+    .panel { padding:14px; }
+    .grid { grid-template-columns:1fr 1fr; }
+    .data { padding:10px; }
+    .data-value { font-size:10px; }
+    .project { padding:12px; }
+    footer { font-size:8px; }
+}
 
-    #screen { padding: 17px; }
-    .topbar { font-size: 9px; }
-    .footer { font-size: 8px; }
+@media(max-width:380px) {
+    .grid { grid-template-columns:1fr; }
 }
 </style>
 </head>
 
 <body>
 
-<div id="terminal">
+<!-- SYSTEM BOOT -->
 
-    <div class="topbar">
-        <span class="logo">NULLPAD</span>
-        <span>METAPHYSICAL SCIENCES DIVISION</span>
-        <span id="connection">INITIALIZING</span>
+<div id="boot">
+    <div class="boot-content">
+        <div class="boot-logo">NULLPAD</div>
+        <div class="boot-sub">METAPHYSICAL SCIENCES DIVISION</div>
+        <div id="boot-log"></div>
+        <div class="boot-progress">
+            <div id="progress"></div>
+        </div>
+    </div>
+</div>
+
+<div id="interface">
+
+<header>
+    <div>
+        <div class="brand">NULLPAD</div>
+        <div class="header-sub">NETWORK GATEWAY // NG-001</div>
     </div>
 
-    <div id="screen"></div>
+    <div class="status">
+        <span class="dot"></span>
+        GATEWAY INTERFACE ONLINE
+    </div>
+</header>
 
-    <div class="command-line">
-        <span class="prompt">root@nullpad:~$</span>
-        <input
-            id="command"
-            type="text"
-            placeholder="Enter command..."
-            autocomplete="off"
-            spellcheck="false"
-            autofocus
-        >
+<main>
+
+<!-- MAIN INTRO -->
+
+<div class="terminal-label">
+    METAPHYSICAL SCIENCES DIVISION // NETWORK INTERFACE
+</div>
+
+<h1>NETWORK GATEWAY</h1>
+
+<div class="intro">
+    CENTRAL ACCESS INTERFACE // REGISTERED NETWORK ENVIRONMENTS
+</div>
+
+<p>
+Central access interface for registered Minecraft environments
+and NULLPAD investigation archives.
+</p>
+
+<div class="system-message">
+    This terminal is configured as a network gateway for the
+    Metaphysical Sciences Division. It provides an index of
+    registered Minecraft projects, server information and
+    investigation records.
+</div>
+
+<!-- CONNECTION INFORMATION -->
+
+<h2>01 // NETWORK GATEWAY // CONNECTION INFORMATION</h2>
+
+<div class="panel">
+    <div class="panel-heading">
+        SYSTEM CONNECTION PARAMETERS
     </div>
 
-    <div class="footer">
-        <span>NULLPAD TERMINAL // NG-001</span>
-        <span id="clock">SYSTEM ONLINE</span>
+    <div class="grid">
+
+        <div class="data">
+            <div class="data-label">GATEWAY ID</div>
+            <div class="data-value">NG-001</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">INTERFACE STATUS</div>
+            <div class="data-value">OPERATIONAL</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">CONNECTED PROJECT</div>
+            <div class="data-value">FRESHLlKE // 001</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">SERVER ADDRESS</div>
+            <div class="data-value">freshlike.gaming</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">NETWORK TYPE</div>
+            <div class="data-value">MINECRAFT JAVA</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">ACCESS LEVEL</div>
+            <div class="data-value">CLASS D</div>
+        </div>
+
+    </div>
+
+    <div class="record">
+        <h3>SERVER DESCRIPTION</h3>
+        <p>
+        FreshLike is a multiplayer Minecraft environment monitored
+        by the Metaphysical Sciences Division. The server serves as
+        an observation environment for documenting unusual world
+        behaviour, player reports and unexplained occurrences.
+        </p>
+    </div>
+
+    <div class="separator">
+    ------------------------------------------------------------
+    </div>
+
+    <div class="muted" style="font-size:10px">
+        REGISTERED ENDPOINT: freshlike.gaming //
+        LIVE REACHABILITY NOT VERIFIED BY THIS PAGE
+    </div>
+</div>
+
+<!-- PROJECTS -->
+
+<h2>02 // REGISTERED NETWORK PROJECTS</h2>
+
+<div class="grid">
+
+    <div class="project">
+        <div class="project-id">PROJECT // 001</div>
+        <div class="project-name">FRESHLlKE</div>
+        <div class="muted">freshlike.gaming</div>
+
+        <div class="project-status">
+            ● REGISTERED // ACTIVE CASE
+        </div>
+
+        <div class="project-description">
+            Multiplayer environment under observation.
+            Reports concern unusual sounds, terrain irregularities
+            and missing chunks.
+        </div>
+    </div>
+
+    <div class="project">
+        <div class="project-id">PROJECT // 817</div>
+        <div class="project-name">RASEBALO'S ANOMALY SERVER</div>
+        <div class="muted">rasebalo.fun</div>
+
+        <div class="project-status">
+            ● REGISTERED // ONGOING
+        </div>
+
+        <div class="project-description">
+            RaseCraft server environment associated with reports
+            of extensive underground passages, audio irregularities
+            and world-generation anomalies.
+        </div>
     </div>
 
 </div>
 
+<div class="system-message">
+    PROJECT REGISTRATION DOES NOT INDICATE A VERIFIED LIVE CONNECTION.
+    HOSTING PROVIDERS AND SERVER CONFIGURATIONS HAVE NOT BEEN
+    INDEPENDENTLY VERIFIED.
+</div>
+
+<!-- ABOUT -->
+
+<h2>03 // ABOUT THE DIVISION</h2>
+
+<section class="record">
+
+    <p>
+    <b class="green">NULLPAD</b> is a classified subdivision of the
+    Metaphysical Sciences Department, established in
+    <b class="green">2013</b> to investigate irregular phenomena
+    occurring within Minecraft environments.
+    </p>
+
+    <p>
+    The division operates observation infrastructure across
+    multiplayer and private servers. Its research is not limited
+    to modern releases: legacy builds, experimental versions,
+    snapshots, Alpha and Beta environments are all valid
+    observation grounds.
+    </p>
+
+    <p>
+    NULLPAD documents unusual world behaviour, unexplained terrain
+    and chunk irregularities, broken or inconsistent game mechanics,
+    entities that appear not to belong to the expected game
+    environment, and events whose behaviour cannot readily be
+    explained by ordinary server activity.
+    </p>
+
+    <p>
+    Reports are treated as records, not conclusions. Investigators
+    preserve version details, server identifiers, timestamps,
+    observed behaviour and repeatability notes wherever available.
+    A strange sighting may be a software fault, plugin interaction,
+    corrupted world state, player-created event—or an unresolved case.
+    </p>
+
+    <p>
+    Each monitored server maintains its own file collection.
+    Standard archives may contain <b class="green">100 or more
+    records per server</b>. Large, high-population or heavily
+    documented servers are handled selectively, with files created
+    when a distinct incident or meaningful pattern is identified.
+    </p>
+
+</section>
+
+<div class="directive">
+    INTERNAL DIRECTIVE:<br>
+    Preserve original observations. Avoid embellishment.
+    Mark unverified interpretations as provisional.
+</div>
+
+<!-- PROFILE -->
+
+<h2>04 // DIVISION PROFILE</h2>
+
+<div class="profile">
+
+    <div class="profile-item">
+        <div class="profile-label">FOUNDATION</div>
+        <div class="profile-value">2013</div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">PARENT ORGANIZATION</div>
+        <div class="profile-value">
+            Metaphysical Sciences Department
+        </div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">PRIMARY FIELD</div>
+        <div class="profile-value">
+            Minecraft server anomalies
+        </div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">VERSION RANGE</div>
+        <div class="profile-value">
+            Modern, legacy, Alpha and Beta
+        </div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">REGISTERED PROJECTS</div>
+        <div class="profile-value">02</div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">RECORD STATUS</div>
+        <div class="profile-value">
+            Classified / ongoing
+        </div>
+    </div>
+
+</div>
+
+<!-- INVESTIGATIONS -->
+
+<h2>05 // CURRENT INVESTIGATIONS</h2>
+
+<div class="record">
+
+    <p>
+    Two Minecraft environments are currently listed in the
+    NULLPAD project directory. Each project has a separate
+    archive and investigation designation.
+    </p>
+
+</div>
+
+<div class="grid">
+
+    <div class="data">
+        <div class="data-label">PROJECT 001</div>
+        <div class="data-value">FRESHLlKE</div>
+        <p class="muted">freshlike.gaming</p>
+    </div>
+
+    <div class="data">
+        <div class="data-label">PROJECT 817</div>
+        <div class="data-value">RASEBALO</div>
+        <p class="muted">rasebalo.fun</p>
+    </div>
+
+</div>
+
+<div class="separator">
+------------------------------------------------------------
+</div>
+
+<div class="terminal-label">
+    END OF GATEWAY INFORMATION
+</div>
+
+<div class="green">
+    NULLPAD // METAPHYSICAL SCIENCES DIVISION
+</div>
+
+<p class="muted" style="font-size:10px">
+    ALL RECORDS ARE SUBJECT TO INTERNAL REVIEW.
+</p>
+
+<span class="cursor"></span>
+
+</main>
+
+<footer>
+    <span>NULLPAD // METAPHYSICAL SCIENCES DIVISION</span>
+    <span>NETWORK GATEWAY // NG-001</span>
+    <span id="year"></span>
+</footer>
+
+</div>
+
 <script>
-const screen = document.getElementById("screen");
-const input = document.getElementById("command");
-const connection = document.getElementById("connection");
-
-let history = [];
-let historyIndex = 0;
-let authenticated = false;
-let currentDirectory = "root";
-let currentProject = null;
-
-const documents = {
-    "001": {
-        title: "FRESHLlKE INCIDENT",
-        project: "PROJECT 001",
-        address: "freshlike.gaming",
-        lead: "NP_qbvm",
-        status: "ACTIVE",
-        sections: [
-            ["INITIAL DISCOVERY",
-            "The investigation began after unusual occurrences were reported on FreshLike. Initially considered isolated technical issues, repeated reports suggested possible connections."],
-
-            ["UNIDENTIFIED FOOTSTEPS",
-            "Footstep sounds reportedly heard inside caves and near players. No confirmed explanation has been established."],
-
-            ["VILLAGE GENERATION",
-            "Villages have reportedly generated inconsistently. Some structures appear incomplete or differently arranged."],
-
-            ["CHUNK DISAPPEARANCE",
-            "Players reported chunks disappearing from previously explored areas. Server-side verification remains incomplete."],
-
-            ["CIVILIAN REPORT",
-            "An additional report was submitted by a player whose identity remains restricted. Source status: UNVERIFIED."],
-
-            ["PROJECT NP_qbvm",
-            "Current project lead. Responsible for coordinating the investigation and maintaining documentation."],
-
-            ["AGENT NP_zht",
-            "Field observer operating on FreshLike. Responsible for collecting reports and documenting unusual events."],
-
-            ["RESTRICTED PERSONNEL",
-            "NP_mvpg — CLASS A\n test — CLASS A\nPersonnel responsibilities remain restricted."],
-
-            ["INVESTIGATION STATUS",
-            "The investigation remains active. Additional observations and reproducible evidence are required."]
-        ]
-    },
-
-    "817": {
-        title: "RASEBALO'S ANOMALY SERVER",
-        project: "PROJECT 817",
-        address: "rasebalo.fun",
-        lead: "NP_zht",
-        status: "ONGOING",
-        sections: [
-            ["OPERATION OVERVIEW",
-            "Operation 817 concerns the investigation of RaseCraft, a Minecraft server operating under rasebalo.fun. The investigation is assigned to Sector A-541."],
-
-            ["SERVER ENVIRONMENT",
-            "Server: RaseCraft\nAddress: rasebalo.fun\nVersion: 1.7.10 (REPORTED)\nPlugins: 2 REPORTED\nDatapacks: 0 REPORTED\nConsole access: NOT CONNECTED."],
-
-            ["UNDERGROUND PASSAGE NETWORK",
-            "Extensive underground tunnels have reportedly been observed. Some passages may approach 9,000 blocks.\n\nReported directions:\nSouth — passages reported.\nWest — additional sections.\nEast — passages continue.\nNorth — further routes.\nNorth-West — additional network."],
-
-            ["AUDIO IRREGULARITIES",
-            "Unusual cave ambience has reportedly been heard outside identifiable cave areas. Some players could not determine the source or direction of sounds. No complete recordings are attached."],
-
-            ["WORLD GENERATION",
-            "Reports concern caves, mountains, villages and dungeons. Some structures reportedly appear incomplete or unusually arranged."],
-
-            ["CHUNK DISAPPEARANCE",
-            "Players reported chunks absent from previously explored areas. Potential explanations include world corruption, incomplete loading and server-side faults."],
-
-            ["CIVILIAN INTERVIEWS",
-            "25 former players were identified as potential sources.\n18 reportedly contacted or interviewed.\n7 not yet interviewed.\nSource reliability: MIXED."],
-
-            ["POST-INTERVIEW ACTIVITY",
-            "Some interviewed players were reportedly not seen logging into the server during subsequent observation periods. No causal connection has been established."],
-
-            ["FIELD AGENT NP_zht",
-            "Responsible for documenting field observations, submitted screenshots and civilian reports."],
-
-            ["INVESTIGATION LIMITATIONS",
-            "No direct server console connection.\nNo complete log archive.\nPlugin configuration unverified.\nSome statements unverified.\nTunnel network not fully mapped.\nNo complete audio recordings."],
-
-            ["CURRENT ASSESSMENT",
-            "Operation 817 remains open. Further observations should prioritize reproducible evidence, exact locations and preservation of original screenshots."]
-        ]
-    }
-};
-
-function print(text = "", color = "") {
-    const div = document.createElement("div");
-    div.className = "line " + color;
-    div.textContent = text;
-    screen.appendChild(div);
-    window.scrollTo(0, document.body.scrollHeight);
-}
-
-function separator() {
-    print("--------------------------------------------", "dim");
-}
-
-function clearScreen() {
-    screen.innerHTML = "";
-}
-
-function help() {
-    separator();
-    print("AVAILABLE COMMANDS", "green");
-    separator();
-
-    const commands = [
-        ["help", "Display available commands"],
-        ["status", "Display system status"],
-        ["about", "Information about NULLPAD"],
-        ["projects", "List registered projects"],
-        ["connect", "Display network endpoints"],
-        ["database", "Open database directory"],
-        ["open 001", "Open FreshLike investigation"],
-        ["open 817", "Open Rasebalo investigation"],
-        ["read", "Read current document"],
-        ["info", "Current document information"],
-        ["back", "Return to database"],
-        ["clear", "Clear terminal"],
-        ["date", "Display system date"],
-        ["whoami", "Display current clearance"],
-        ["logout", "Terminate current session"]
-    ];
-
-    commands.forEach(([name, description]) => {
-        print(name.padEnd(18) + " - " + description, "white");
-    });
-
-    separator();
-}
-
-function showStatus() {
-    print("NULLPAD SYSTEM STATUS", "green");
-    separator();
-    print("SYSTEM .............. OPERATIONAL");
-    print("GATEWAY ID .......... NG-001");
-    print("NETWORK ............. INITIALIZED");
-    print("DATABASE ............ AVAILABLE");
-    print("ACCESS LEVEL ........ " + (authenticated ? "CLASS D" : "UNAUTHENTICATED"));
-    print("REGISTERED PROJECTS . 02");
-    print("ACTIVE CASES ........ 02");
-    separator();
-}
-
-function showProjects() {
-    print("REGISTERED PROJECT DIRECTORY", "green");
-    separator();
-
-    print("[001] FRESHLlKE", "white");
-    print("      ADDRESS: freshlike.gaming");
-    print("      STATUS: ACTIVE");
-    print("");
-
-    print("[817] RASEBALO'S ANOMALY SERVER", "white");
-    print("      ADDRESS: rasebalo.fun");
-    print("      STATUS: ONGOING");
-
-    separator();
-    print("Use OPEN 001 or OPEN 817 to access a record.", "dim");
-}
-
-function showDatabase() {
-    currentDirectory = "database";
-
-    print("DATABASE // REGISTERED DOCUMENTS", "green");
-    separator();
-
-    print("[001] FRESHLlKE INCIDENT", "white");
-    print("[817] RASEBALO'S ANOMALY SERVER", "white");
-    print("[002] ANOMALY REPORTS ........ LOCKED", "dim");
-    print("[003] HUMAN RESEARCH .......... LOCKED", "dim");
-    print("[004] AGENT RECORDS ........... LOCKED", "dim");
-
-    separator();
-    print("Use OPEN <ID> to access available files.", "dim");
-}
-
-function openDocument(id) {
-    if (!documents[id]) {
-        print("ERROR: DOCUMENT NOT FOUND.", "red");
-        return;
-    }
-
-    currentProject = id;
-    currentDirectory = "document";
-
-    const doc = documents[id];
-
-    separator();
-    print("DOCUMENT ACCESS GRANTED", "green");
-    print("DOCUMENT // " + id + " // " + doc.project);
-    print("TITLE: " + doc.title, "white");
-    print("SERVER: " + doc.address);
-    print("LEAD: " + doc.lead);
-    print("STATUS: " + doc.status);
-    separator();
-
-    print("Type READ to display document contents.", "dim");
-    print("Type INFO to display document metadata.", "dim");
-}
-
-function readDocument() {
-    if (!currentProject) {
-        print("ERROR: NO DOCUMENT SELECTED.", "red");
-        return;
-    }
-
-    const doc = documents[currentProject];
-
-    print("READING DOCUMENT // " + currentProject, "green");
-    separator();
-
-    doc.sections.forEach((section, index) => {
-        print(
-            String(index + 1).padStart(2, "0") +
-            " // " + section[0],
-            "green"
-        );
-
-        print(section[1], "white");
-        print("");
-    });
-
-    separator();
-    print("END OF DOCUMENT // " + currentProject, "green");
-}
-
-function showInfo() {
-    if (!currentProject) {
-        print("NO DOCUMENT SELECTED.", "red");
-        return;
-    }
-
-    const doc = documents[currentProject];
-
-    print("DOCUMENT METADATA", "green");
-    separator();
-    print("ID: " + currentProject);
-    print("TITLE: " + doc.title);
-    print("PROJECT: " + doc.project);
-    print("SERVER: " + doc.address);
-    print("PROJECT LEAD: " + doc.lead);
-    print("STATUS: " + doc.status);
-    print("SECTIONS: " + doc.sections.length);
-    separator();
-}
-
-function connect() {
-    print("NETWORK GATEWAY // NG-001", "green");
-    separator();
-    print("ENDPOINT 001: freshlike.gaming");
-    print("ENDPOINT 817: rasebalo.fun");
-    print("NETWORK TYPE: MINECRAFT JAVA");
-    print("CONNECTION STATUS: NOT VERIFIED");
-    separator();
-    print("This interface displays registered endpoints only.");
-    print("It does not establish a live server connection.", "dim");
-}
-
-function about() {
-    print("NULLPAD", "green");
-    separator();
-    print("METAPHYSICAL SCIENCES DIVISION");
-    print("FOUNDATION: 2013");
-    print("PRIMARY FIELD: MINECRAFT SERVER ANOMALIES");
-    print("VERSION RANGE: MODERN / LEGACY / ALPHA / BETA");
-    print("");
-    print("NULLPAD documents unusual world behaviour,");
-    print("terrain irregularities, audio reports and");
-    print("unexplained server incidents.");
-    separator();
-}
-
-function execute(raw) {
-    const value = raw.trim();
-    if (!value) return;
-
-    print("root@nullpad:~$ " + value, "green");
-
-    history.push(value);
-    historyIndex = history.length;
-
-    const parts = value.toLowerCase().split(/\s+/);
-    const command = parts[0];
-    const argument = parts[1];
-
-    switch (command) {
-        case "help":
-            help();
-            break;
-
-        case "status":
-            showStatus();
-            break;
-
-        case "about":
-            about();
-            break;
-
-        case "projects":
-            showProjects();
-            break;
-
-        case "connect":
-            connect();
-            break;
-
-        case "database":
-            showDatabase();
-            break;
-
-        case "open":
-            if (!argument) {
-                print("USAGE: OPEN <DOCUMENT ID>", "red");
-            } else {
-                openDocument(argument);
-            }
-            break;
-
-        case "read":
-            readDocument();
-            break;
-
-        case "info":
-            showInfo();
-            break;
-
-        case "back":
-            currentProject = null;
-            showDatabase();
-            break;
-
-        case "clear":
-            clearScreen();
-            break;
-
-        case "date":
-            print(new Date().toLocaleString());
-            break;
-
-        case "whoami":
-            print("USER: NULLPAD OPERATOR");
-            print("CLEARANCE: CLASS D", "green");
-            break;
-
-        case "logout":
-            authenticated = false;
-            currentProject = null;
-            print("SESSION TERMINATED.", "red");
-            print("DEMO TERMINAL: RELOAD PAGE TO RESTART.");
-            input.disabled = true;
-            break;
-
-        default:
-            print("UNKNOWN COMMAND: " + command, "red");
-            print("TYPE HELP TO DISPLAY AVAILABLE COMMANDS.", "dim");
+const bootMessages = [
+    "NULLPAD OPERATING SYSTEM [VERSION 2.4.1]",
+    "METAPHYSICAL SCIENCES DIVISION",
+    "",
+    "INITIALIZING SYSTEM.................. OK",
+    "LOADING NETWORK MODULE............... OK",
+    "INITIALIZING DATABASE................ OK",
+    "LOADING PROJECT ARCHIVE.............. OK",
+    "VERIFYING GATEWAY INTERFACE.......... OK",
+    "CHECKING REGISTERED ENDPOINTS........ OK",
+    "",
+    "SYSTEM STATUS: OPERATIONAL",
+    "GATEWAY ID: NG-001",
+    "ACCESS LEVEL: CLASS D",
+    "",
+    "WELCOME TO NULLPAD."
+];
+
+const bootLog = document.getElementById("boot-log");
+const progress = document.getElementById("progress");
+const boot = document.getElementById("boot");
+const ui = document.getElementById("interface");
+
+let current = 0;
+
+function bootStep() {
+    if (current < bootMessages.length) {
+        bootLog.textContent += bootMessages[current] + "\n";
+
+        progress.style.width =
+            ((current + 1) / bootMessages.length * 100) + "%";
+
+        current++;
+
+        setTimeout(bootStep, 115);
+    } else {
+        setTimeout(() => {
+            boot.style.opacity = "0";
+            ui.style.opacity = "1";
+
+            setTimeout(() => {
+                boot.style.display = "none";
+            }, 850);
+        }, 500);
     }
 }
 
-input.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        const value = input.value;
-        input.value = "";
-        execute(value);
-    }
+document.getElementById("year").textContent =
+    new Date().getFullYear();
 
-    if (event.key === "ArrowUp") {
-        event.preventDefault();
-        if (historyIndex > 0) {
-            historyIndex--;
-            input.value = history[historyIndex];
-        }
-    }
-
-    if (event.key === "ArrowDown") {
-        event.preventDefault();
-        if (historyIndex < history.length - 1) {
-            historyIndex++;
-            input.value = history[historyIndex];
-        } else {
-            historyIndex = history.length;
-            input.value = "";
-        }
-    }
-
-    if (event.key === "Tab") {
-        event.preventDefault();
-        const commands = [
-            "help", "status", "about", "projects",
-            "connect", "database", "open 001",
-            "open 817", "read", "info", "back",
-            "clear", "date", "whoami"
-        ];
-
-        const match = commands.find(command =>
-            command.startsWith(input.value.toLowerCase())
-        );
-
-        if (match) input.value = match;
-    }
-});
-
-// BOOT SEQUENCE
-
-async function boot() {
-    input.disabled = true;
-
-    const messages = [
-        ["NULLPAD OPERATING SYSTEM [VERSION 2.4.1]", "green"],
-        ["METAPHYSICAL SCIENCES DIVISION", "dim"],
-        ["", ""],
-        ["INITIALIZING SYSTEM.................. OK", "white"],
-        ["LOADING NETWORK MODULE............... OK", "white"],
-        ["INITIALIZING DATABASE............... OK", "white"],
-        ["LOADING PROJECT ARCHIVE.............. OK", "white"],
-        ["VERIFYING LOCAL INTERFACE............ OK", "white"],
-        ["", ""],
-        ["SYSTEM STATUS: OPERATIONAL", "green"],
-        ["GATEWAY ID: NG-001", "green"],
-        ["REGISTERED PROJECTS: 02", "green"],
-        ["", ""],
-        ["WARNING: LIVE SERVER CONNECTION NOT VERIFIED.", "dim"],
-        ["", ""],
-        ["TYPE 'HELP' TO DISPLAY AVAILABLE COMMANDS.", "green"],
-        ["TYPE 'ABOUT' TO LEARN ABOUT NULLPAD.", "dim"],
-        ["", ""]
-    ];
-
-    for (const [message, color] of messages) {
-        print(message, color);
-        await new Promise(resolve => setTimeout(resolve, 100));
-    }
-
-    authenticated = true;
-    connection.textContent = "INTERFACE ONLINE";
-    input.disabled = false;
-    input.focus();
-}
-
-document.addEventListener("click", () => {
-    if (!input.disabled) input.focus();
-});
-
-setInterval(() => {
-    document.getElementById("clock").textContent =
-        new Date().toLocaleTimeString();
-}, 1000);
-
-boot();
+bootStep();
 </script>
 
 </body>
