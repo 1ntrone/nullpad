@@ -32,11 +32,9 @@ body{
  display:flex;
  flex-direction:column;
  overflow:hidden;
-
  opacity:0;
  transform:translateY(15px) scale(.985);
  filter:brightness(.4);
-
  animation:terminalEnter 1.3s cubic-bezier(.2,.8,.2,1) forwards;
 }
 
@@ -57,16 +55,13 @@ body{
  }
 }
 
-/* =================================
-   STARTUP INTERFACE ANIMATIONS
-================================= */
+/* STARTUP PANELS */
 
 .top{
  flex-shrink:0;
  border-bottom:1px solid #246b36;
  padding-bottom:14px;
  margin-bottom:15px;
-
  opacity:0;
  transform:translateY(-10px);
  animation:panelEnter .7s ease-out .25s forwards;
@@ -84,7 +79,6 @@ body{
  padding-right:7px;
  scrollbar-width:thin;
  scrollbar-color:#246b36 #020502;
-
  opacity:0;
  animation:screenEnter .8s ease-out .45s forwards;
 }
@@ -97,7 +91,6 @@ body{
  border-top:1px solid #246b36;
  padding-top:14px;
  margin-top:8px;
-
  opacity:0;
  transform:translateY(10px);
  animation:panelEnter .7s ease-out .65s forwards;
@@ -111,7 +104,6 @@ body{
  display:flex;
  justify-content:space-between;
  gap:8px;
-
  opacity:0;
  animation:screenEnter .7s ease-out .85s forwards;
 }
@@ -128,9 +120,7 @@ body{
  to{opacity:1}
 }
 
-/* =================================
-   LOGO
-================================= */
+/* LOGO */
 
 .logo{
  font-size:25px;
@@ -150,32 +140,14 @@ body{
  margin-top:4px;
 }
 
-/* =================================
-   TERMINAL OUTPUT ANIMATIONS
-================================= */
+/* OUTPUT LINES */
 
 .line{
  margin:0 0 5px;
- opacity:0;
- transform:translateY(7px);
- animation:lineAppear .4s cubic-bezier(.2,.8,.2,1) forwards;
-}
-
-@keyframes lineAppear{
- 0%{
-  opacity:0;
-  transform:translateY(7px);
-  text-shadow:0 0 0 transparent;
- }
- 60%{
-  opacity:1;
-  text-shadow:0 0 8px currentColor;
- }
- 100%{
-  opacity:1;
-  transform:translateY(0);
-  text-shadow:none;
- }
+ opacity:1;
+ transform:translateY(0);
+ white-space:pre-wrap;
+ overflow-wrap:anywhere;
 }
 
 .system{color:#54b86b}
@@ -184,9 +156,7 @@ body{
 .dim{color:#39864c}
 .success{color:#8aff9e}
 
-/* =================================
-   INPUT
-================================= */
+/* INPUT */
 
 .prompt{
  white-space:nowrap;
@@ -242,15 +212,6 @@ button:hover{
  .footer{font-size:9px}
  button{padding:8px 10px}
 }
-
-@media(prefers-reduced-motion:reduce){
- *,*::before,*::after{
-  animation-duration:.01ms!important;
-  animation-iteration-count:1!important;
-  transition-duration:.01ms!important;
-  scroll-behavior:auto!important;
- }
-}
 </style>
 </head>
 
@@ -304,11 +265,8 @@ const input = document.getElementById("command");
 const prompt = document.getElementById("prompt");
 const sessionLabel = document.getElementById("sessionLabel");
 
-const reducedMotion =
- window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 // ==========================================
-// OUTPUT QUEUE
+// OUTPUT QUEUE AND ANIMATIONS
 // ==========================================
 
 let outputQueue = Promise.resolve();
@@ -318,42 +276,75 @@ function sleep(ms){
  return new Promise(resolve=>setTimeout(resolve,ms));
 }
 
+function nextFrame(){
+ return new Promise(resolve=>requestAnimationFrame(resolve));
+}
+
+async function animateLine(div){
+ div.style.opacity = "0";
+ div.style.transform = "translateY(9px)";
+ div.style.filter = "brightness(1.8)";
+
+ await nextFrame();
+ await nextFrame();
+
+ div.animate(
+  [
+   {
+    opacity:0,
+    transform:"translateY(9px)",
+    filter:"brightness(1.8)"
+   },
+   {
+    opacity:1,
+    transform:"translateY(0)",
+    filter:"brightness(1)"
+   }
+  ],
+  {
+   duration:420,
+   easing:"cubic-bezier(.2,.8,.2,1)",
+   fill:"forwards"
+  }
+ );
+}
+
 function print(text="",type=""){
- const generation=outputGeneration;
+ const generation = outputGeneration;
 
- outputQueue=outputQueue.then(async()=>{
-  if(generation!==outputGeneration)return;
+ outputQueue = outputQueue.then(async()=>{
+  if(generation !== outputGeneration)return;
 
-  const div=document.createElement("div");
-  div.className="line "+type;
+  const div = document.createElement("div");
+  div.className = "line " + type;
+
   screen.appendChild(div);
 
-  const content=String(text);
+  await animateLine(div);
 
-  // Reduced motion or empty text.
-  if(reducedMotion || content.length===0){
-   div.textContent=content;
-   screen.scrollTop=screen.scrollHeight;
+  const content = String(text);
+
+  if(content.length === 0){
+   div.textContent = "";
+   screen.scrollTop = screen.scrollHeight;
    return;
   }
 
-  // Typewriter effect.
-  // Short lines are slower; long lines are faster.
-  let speed=content.length>60?2:8;
+  const speed =
+   content.length > 100 ? 1 :
+   content.length > 60 ? 2 : 8;
 
   for(let i=0;i<content.length;i++){
-   if(generation!==outputGeneration)return;
+   if(generation !== outputGeneration)return;
 
-   div.textContent=content.slice(0,i+1);
-   screen.scrollTop=screen.scrollHeight;
+   div.textContent = content.slice(0,i+1);
+   screen.scrollTop = screen.scrollHeight;
 
    await sleep(speed);
   }
 
-  screen.scrollTop=screen.scrollHeight;
-
-  // Small pause before the next line.
-  await sleep(35);
+  screen.scrollTop = screen.scrollHeight;
+  await sleep(65);
  });
 
  return outputQueue;
@@ -365,16 +356,16 @@ function divider(){
 
 function clearScreen(){
  outputGeneration++;
- outputQueue=Promise.resolve();
- screen.innerHTML="";
+ outputQueue = Promise.resolve();
+ screen.innerHTML = "";
 }
 
 function updateSession(){
- prompt.textContent=authenticated?"NP_ROOT >":"LOGIN >";
+ prompt.textContent = authenticated ? "NP_ROOT >" : "LOGIN >";
 
- sessionLabel.textContent=
-  !authenticated?"SESSION: LOCKED":
-  accessGranted?"SESSION: ELEVATED":
+ sessionLabel.textContent =
+  !authenticated ? "SESSION: LOCKED" :
+  accessGranted ? "SESSION: ELEVATED" :
   "SESSION: STANDARD";
 }
 
@@ -1038,10 +1029,6 @@ function execute(){
  const argLower=arg.toLowerCase();
  const arg2=parts[2]||"";
 
- // ----------------------------------------
- // COMMANDS AVAILABLE BEFORE LOGIN
- // ----------------------------------------
-
  if(command==="login"){
   const password=raw.slice(parts[0].length).trim();
 
@@ -1075,10 +1062,6 @@ function execute(){
 
   return;
  }
-
- // ----------------------------------------
- // AUTHENTICATED COMMANDS
- // ----------------------------------------
 
  if(command==="logout"){
   logout();
