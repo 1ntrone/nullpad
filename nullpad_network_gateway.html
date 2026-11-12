@@ -1,0 +1,778 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NULLPAD // NG-001</title>
+
+<style>
+:root {
+    --bg:#020503;
+    --panel:#050b06;
+    --green:#48ff83;
+    --green2:#a1ffb8;
+    --dim:#477653;
+    --border:#174526;
+    --red:#ff5555;
+    --text:#b5d4bd;
+}
+
+* { box-sizing:border-box; }
+
+html { scroll-behavior:smooth; }
+
+body {
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13px;
+    line-height:1.8;
+    overflow-x:hidden;
+}
+
+body:before {
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:20;
+    background:repeating-linear-gradient(
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,.16) 4px
+    );
+}
+
+body:after {
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:19;
+    box-shadow:inset 0 0 100px rgba(0,0,0,.7);
+}
+
+::selection {
+    background:var(--green);
+    color:#000;
+}
+
+#boot {
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:#020503;
+    padding:35px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:opacity .8s;
+}
+
+.boot-content {
+    width:min(600px,100%);
+}
+
+.boot-logo {
+    font-size:34px;
+    color:var(--green);
+    letter-spacing:9px;
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.boot-sub {
+    color:var(--dim);
+    font-size:10px;
+    letter-spacing:3px;
+    margin-bottom:30px;
+}
+
+#boot-log {
+    color:var(--green);
+    font-size:12px;
+    line-height:2;
+    white-space:pre-wrap;
+}
+
+.boot-progress {
+    width:100%;
+    height:3px;
+    background:#102516;
+    margin-top:25px;
+}
+
+#progress {
+    width:0%;
+    height:100%;
+    background:var(--green);
+    box-shadow:0 0 12px var(--green);
+    transition:width .2s;
+}
+
+#interface {
+    opacity:0;
+    transition:opacity 1s;
+}
+
+header {
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:rgba(2,6,3,.96);
+    border-bottom:1px solid var(--border);
+    padding:13px 5%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    backdrop-filter:blur(8px);
+}
+
+.brand {
+    color:var(--green);
+    font-size:21px;
+    font-weight:bold;
+    letter-spacing:6px;
+    text-shadow:0 0 12px rgba(72,255,131,.3);
+}
+
+.header-sub {
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:2px;
+}
+
+.status {
+    color:var(--green);
+    font-size:10px;
+    letter-spacing:2px;
+}
+
+.dot {
+    display:inline-block;
+    width:7px;
+    height:7px;
+    background:var(--green);
+    border-radius:50%;
+    margin-right:8px;
+    box-shadow:0 0 10px var(--green);
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    50% { opacity:.3; }
+}
+
+main {
+    width:min(1050px,90%);
+    margin:45px auto 80px;
+}
+
+.terminal-label {
+    color:var(--dim);
+    font-size:10px;
+    letter-spacing:3px;
+    margin-bottom:12px;
+}
+
+h1 {
+    color:var(--green);
+    font-size:clamp(28px,5vw,43px);
+    line-height:1.2;
+    letter-spacing:3px;
+    margin:0 0 12px;
+    text-shadow:0 0 15px rgba(72,255,131,.2);
+}
+
+h2 {
+    color:var(--green);
+    font-size:13px;
+    letter-spacing:3px;
+    font-weight:normal;
+    margin:45px 0 20px;
+    padding:12px 0;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+}
+
+h3 {
+    color:var(--green2);
+    font-size:12px;
+    letter-spacing:2px;
+    font-weight:normal;
+    margin:0 0 13px;
+}
+
+p {
+    margin:10px 0;
+    line-height:1.9;
+}
+
+.muted { color:var(--dim); }
+.green { color:var(--green); }
+.red { color:var(--red); }
+
+.intro {
+    color:var(--dim);
+    font-size:12px;
+    letter-spacing:1px;
+    margin-bottom:25px;
+}
+
+.separator {
+    color:#285536;
+    overflow:hidden;
+    white-space:nowrap;
+    margin:18px 0;
+}
+
+.system-message {
+    background:#061008;
+    border-left:2px solid var(--green);
+    padding:15px 18px;
+    margin:25px 0;
+    color:var(--text);
+    font-size:12px;
+    line-height:2;
+}
+
+.panel {
+    border:1px solid var(--border);
+    background:rgba(5,12,7,.8);
+    margin:22px 0;
+    padding:20px;
+}
+
+.panel-heading {
+    color:var(--green);
+    font-size:11px;
+    letter-spacing:3px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:12px;
+    margin-bottom:18px;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:10px;
+}
+
+.data {
+    padding:13px;
+    background:#030805;
+    border:1px solid #142b1b;
+    min-width:0;
+}
+
+.data-label {
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:2px;
+    margin-bottom:7px;
+}
+
+.data-value {
+    color:var(--green);
+    font-size:12px;
+    overflow-wrap:anywhere;
+}
+
+.project {
+    padding:17px;
+    border:1px solid var(--border);
+    background:#030805;
+}
+
+.project-id {
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:2px;
+    margin-bottom:10px;
+}
+
+.project-name {
+    color:var(--green);
+    font-size:15px;
+    margin-bottom:5px;
+}
+
+.project-status {
+    color:var(--green);
+    font-size:10px;
+    margin:12px 0;
+}
+
+.project-description {
+    color:#8eae97;
+    font-size:11px;
+    line-height:1.9;
+}
+
+.record {
+    margin:35px 0;
+}
+
+.record p {
+    color:#a8c3af;
+    font-size:12px;
+}
+
+.directive {
+    border:1px solid var(--border);
+    padding:15px 18px;
+    margin:25px 0;
+    color:var(--green2);
+    background:#040b06;
+    font-size:11px;
+    letter-spacing:.4px;
+}
+
+.profile {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    border-top:1px solid var(--border);
+    border-left:1px solid var(--border);
+}
+
+.profile-item {
+    padding:17px;
+    border-right:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+}
+
+.profile-label {
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:2px;
+    margin-bottom:9px;
+}
+
+.profile-value {
+    color:var(--green);
+    font-size:12px;
+}
+
+footer {
+    border-top:1px solid var(--border);
+    padding:20px 5%;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    color:#45604b;
+    font-size:9px;
+    letter-spacing:2px;
+}
+
+.cursor {
+    display:inline-block;
+    width:7px;
+    height:13px;
+    background:var(--green);
+    vertical-align:middle;
+    animation:blink 1s steps(2) infinite;
+}
+
+@keyframes blink {
+    50% { opacity:0; }
+}
+
+@media(max-width:600px) {
+    header { padding:12px 5%; }
+    main { width:92%; margin-top:30px; }
+    .panel { padding:14px; }
+    .grid { grid-template-columns:1fr 1fr; }
+    .data { padding:10px; }
+    .data-value { font-size:10px; }
+    .project { padding:12px; }
+    footer { font-size:8px; }
+}
+
+@media(max-width:380px) {
+    .grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- SYSTEM BOOT -->
+
+<div id="boot">
+    <div class="boot-content">
+        <div class="boot-logo">NULLPAD</div>
+        <div class="boot-sub">METAPHYSICAL SCIENCES DIVISION</div>
+        <div id="boot-log"></div>
+        <div class="boot-progress">
+            <div id="progress"></div>
+        </div>
+    </div>
+</div>
+
+<div id="interface">
+
+<header>
+    <div>
+        <div class="brand">NULLPAD</div>
+        <div class="header-sub">NETWORK GATEWAY // NG-001</div>
+    </div>
+
+    <div class="status">
+        <span class="dot"></span>
+        GATEWAY INTERFACE ONLINE
+    </div>
+</header>
+
+<main>
+
+<!-- MAIN INTRO -->
+
+<div class="terminal-label">
+    METAPHYSICAL SCIENCES DIVISION // NETWORK INTERFACE
+</div>
+
+<h1>NETWORK GATEWAY</h1>
+
+<div class="intro">
+    CENTRAL ACCESS INTERFACE // REGISTERED NETWORK ENVIRONMENTS
+</div>
+
+<p>
+Central access interface for registered Minecraft environments
+and NULLPAD investigation archives.
+</p>
+
+<div class="system-message">
+    This terminal is configured as a network gateway for the
+    Metaphysical Sciences Division. It provides an index of
+    registered Minecraft projects, server information and
+    investigation records.
+</div>
+
+<!-- CONNECTION INFORMATION -->
+
+<h2>01 // NETWORK GATEWAY // CONNECTION INFORMATION</h2>
+
+<div class="panel">
+    <div class="panel-heading">
+        SYSTEM CONNECTION PARAMETERS
+    </div>
+
+    <div class="grid">
+
+        <div class="data">
+            <div class="data-label">GATEWAY ID</div>
+            <div class="data-value">NG-001</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">INTERFACE STATUS</div>
+            <div class="data-value">OPERATIONAL</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">CONNECTED PROJECT</div>
+            <div class="data-value">FRESHLlKE // 001</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">SERVER ADDRESS</div>
+            <div class="data-value">freshlike.gaming</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">NETWORK TYPE</div>
+            <div class="data-value">MINECRAFT JAVA</div>
+        </div>
+
+        <div class="data">
+            <div class="data-label">ACCESS LEVEL</div>
+            <div class="data-value">CLASS D</div>
+        </div>
+
+    </div>
+
+    <div class="record">
+        <h3>SERVER DESCRIPTION</h3>
+        <p>
+        FreshLike is a multiplayer Minecraft environment monitored
+        by the Metaphysical Sciences Division. The server serves as
+        an observation environment for documenting unusual world
+        behaviour, player reports and unexplained occurrences.
+        </p>
+    </div>
+
+    <div class="separator">
+    ------------------------------------------------------------
+    </div>
+
+    <div class="muted" style="font-size:10px">
+        REGISTERED ENDPOINT: freshlike.gaming //
+        LIVE REACHABILITY NOT VERIFIED BY THIS PAGE
+    </div>
+</div>
+
+<!-- PROJECTS -->
+
+<h2>02 // REGISTERED NETWORK PROJECTS</h2>
+
+<div class="grid">
+
+    <div class="project">
+        <div class="project-id">PROJECT // 001</div>
+        <div class="project-name">FRESHLlKE</div>
+        <div class="muted">freshlike.gaming</div>
+
+        <div class="project-status">
+            ● REGISTERED // ACTIVE CASE
+        </div>
+
+        <div class="project-description">
+            Multiplayer environment under observation.
+            Reports concern unusual sounds, terrain irregularities
+            and missing chunks.
+        </div>
+    </div>
+
+    <div class="project">
+        <div class="project-id">PROJECT // 817</div>
+        <div class="project-name">RASEBALO'S ANOMALY SERVER</div>
+        <div class="muted">rasebalo.fun</div>
+
+        <div class="project-status">
+            ● REGISTERED // ONGOING
+        </div>
+
+        <div class="project-description">
+            RaseCraft server environment associated with reports
+            of extensive underground passages, audio irregularities
+            and world-generation anomalies.
+        </div>
+    </div>
+
+</div>
+
+<div class="system-message">
+    PROJECT REGISTRATION DOES NOT INDICATE A VERIFIED LIVE CONNECTION.
+    HOSTING PROVIDERS AND SERVER CONFIGURATIONS HAVE NOT BEEN
+    INDEPENDENTLY VERIFIED.
+</div>
+
+<!-- ABOUT -->
+
+<h2>03 // ABOUT THE DIVISION</h2>
+
+<section class="record">
+
+    <p>
+    <b class="green">NULLPAD</b> is a classified subdivision of the
+    Metaphysical Sciences Department, established in
+    <b class="green">2013</b> to investigate irregular phenomena
+    occurring within Minecraft environments.
+    </p>
+
+    <p>
+    The division operates observation infrastructure across
+    multiplayer and private servers. Its research is not limited
+    to modern releases: legacy builds, experimental versions,
+    snapshots, Alpha and Beta environments are all valid
+    observation grounds.
+    </p>
+
+    <p>
+    NULLPAD documents unusual world behaviour, unexplained terrain
+    and chunk irregularities, broken or inconsistent game mechanics,
+    entities that appear not to belong to the expected game
+    environment, and events whose behaviour cannot readily be
+    explained by ordinary server activity.
+    </p>
+
+    <p>
+    Reports are treated as records, not conclusions. Investigators
+    preserve version details, server identifiers, timestamps,
+    observed behaviour and repeatability notes wherever available.
+    A strange sighting may be a software fault, plugin interaction,
+    corrupted world state, player-created event—or an unresolved case.
+    </p>
+
+    <p>
+    Each monitored server maintains its own file collection.
+    Standard archives may contain <b class="green">100 or more
+    records per server</b>. Large, high-population or heavily
+    documented servers are handled selectively, with files created
+    when a distinct incident or meaningful pattern is identified.
+    </p>
+
+</section>
+
+<div class="directive">
+    INTERNAL DIRECTIVE:<br>
+    Preserve original observations. Avoid embellishment.
+    Mark unverified interpretations as provisional.
+</div>
+
+<!-- PROFILE -->
+
+<h2>04 // DIVISION PROFILE</h2>
+
+<div class="profile">
+
+    <div class="profile-item">
+        <div class="profile-label">FOUNDATION</div>
+        <div class="profile-value">2013</div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">PARENT ORGANIZATION</div>
+        <div class="profile-value">
+            Metaphysical Sciences Department
+        </div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">PRIMARY FIELD</div>
+        <div class="profile-value">
+            Minecraft server anomalies
+        </div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">VERSION RANGE</div>
+        <div class="profile-value">
+            Modern, legacy, Alpha and Beta
+        </div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">REGISTERED PROJECTS</div>
+        <div class="profile-value">02</div>
+    </div>
+
+    <div class="profile-item">
+        <div class="profile-label">RECORD STATUS</div>
+        <div class="profile-value">
+            Classified / ongoing
+        </div>
+    </div>
+
+</div>
+
+<!-- INVESTIGATIONS -->
+
+<h2>05 // CURRENT INVESTIGATIONS</h2>
+
+<div class="record">
+
+    <p>
+    Two Minecraft environments are currently listed in the
+    NULLPAD project directory. Each project has a separate
+    archive and investigation designation.
+    </p>
+
+</div>
+
+<div class="grid">
+
+    <div class="data">
+        <div class="data-label">PROJECT 001</div>
+        <div class="data-value">FRESHLlKE</div>
+        <p class="muted">freshlike.gaming</p>
+    </div>
+
+    <div class="data">
+        <div class="data-label">PROJECT 817</div>
+        <div class="data-value">RASEBALO</div>
+        <p class="muted">rasebalo.fun</p>
+    </div>
+
+</div>
+
+<div class="separator">
+------------------------------------------------------------
+</div>
+
+<div class="terminal-label">
+    END OF GATEWAY INFORMATION
+</div>
+
+<div class="green">
+    NULLPAD // METAPHYSICAL SCIENCES DIVISION
+</div>
+
+<p class="muted" style="font-size:10px">
+    ALL RECORDS ARE SUBJECT TO INTERNAL REVIEW.
+</p>
+
+<span class="cursor"></span>
+
+</main>
+
+<footer>
+    <span>NULLPAD // METAPHYSICAL SCIENCES DIVISION</span>
+    <span>NETWORK GATEWAY // NG-001</span>
+    <span id="year"></span>
+</footer>
+
+</div>
+
+<script>
+const bootMessages = [
+    "NULLPAD OPERATING SYSTEM [VERSION 2.4.1]",
+    "METAPHYSICAL SCIENCES DIVISION",
+    "",
+    "INITIALIZING SYSTEM.................. OK",
+    "LOADING NETWORK MODULE............... OK",
+    "INITIALIZING DATABASE................ OK",
+    "LOADING PROJECT ARCHIVE.............. OK",
+    "VERIFYING GATEWAY INTERFACE.......... OK",
+    "CHECKING REGISTERED ENDPOINTS........ OK",
+    "",
+    "SYSTEM STATUS: OPERATIONAL",
+    "GATEWAY ID: NG-001",
+    "ACCESS LEVEL: CLASS D",
+    "",
+    "WELCOME TO NULLPAD."
+];
+
+const bootLog = document.getElementById("boot-log");
+const progress = document.getElementById("progress");
+const boot = document.getElementById("boot");
+const ui = document.getElementById("interface");
+
+let current = 0;
+
+function bootStep() {
+    if (current < bootMessages.length) {
+        bootLog.textContent += bootMessages[current] + "\n";
+
+        progress.style.width =
+            ((current + 1) / bootMessages.length * 100) + "%";
+
+        current++;
+
+        setTimeout(bootStep, 115);
+    } else {
+        setTimeout(() => {
+            boot.style.opacity = "0";
+            ui.style.opacity = "1";
+
+            setTimeout(() => {
+                boot.style.display = "none";
+            }, 850);
+        }, 500);
+    }
+}
+
+document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+bootStep();
+</script>
+
+</body>
+</html>
