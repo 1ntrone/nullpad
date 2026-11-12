@@ -32,6 +32,13 @@ body{
  display:flex;
  flex-direction:column;
  overflow:hidden;
+ animation:terminalStart 1.2s ease-out;
+}
+
+@keyframes terminalStart{
+ 0%{opacity:0;filter:brightness(0)}
+ 45%{opacity:.65;filter:brightness(1.7)}
+ 100%{opacity:1;filter:brightness(1)}
 }
 
 .top{
@@ -45,6 +52,12 @@ body{
  font-size:25px;
  letter-spacing:5px;
  text-shadow:0 0 12px #36ff63;
+ animation:logoGlow 3s infinite alternate;
+}
+
+@keyframes logoGlow{
+ from{text-shadow:0 0 5px #36ff63}
+ to{text-shadow:0 0 18px #36ff63,0 0 30px #168b35}
 }
 
 .muted{
@@ -67,7 +80,22 @@ body{
  scrollbar-color:#246b36 #020502;
 }
 
-.line{margin:0 0 5px}
+.line{
+ margin:0 0 5px;
+ animation:lineAppear .2s ease-out both;
+}
+
+@keyframes lineAppear{
+ from{
+  opacity:0;
+  transform:translateY(4px);
+ }
+ to{
+  opacity:1;
+  transform:translateY(0);
+ }
+}
+
 .system{color:#54b86b}
 .error{color:#ff6464}
 .warning{color:#e5c66b}
@@ -89,6 +117,16 @@ body{
  color:#62ff80;
 }
 
+.prompt::after{
+ content:"█";
+ margin-left:5px;
+ animation:blink .8s steps(2,start) infinite;
+}
+
+@keyframes blink{
+ to{visibility:hidden}
+}
+
 input{
  background:transparent;
  border:0;
@@ -107,6 +145,7 @@ button{
  padding:9px 15px;
  font:inherit;
  cursor:pointer;
+ transition:background .2s,box-shadow .2s;
 }
 
 button:hover{
@@ -135,6 +174,14 @@ button:hover{
  #screen{font-size:12px}
  .footer{font-size:9px}
  button{padding:8px 10px}
+}
+
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{
+  animation-duration:.01ms!important;
+  animation-iteration-count:1!important;
+  transition-duration:.01ms!important;
+ }
 }
 </style>
 </head>
@@ -189,16 +236,63 @@ const input = document.getElementById("command");
 const prompt = document.getElementById("prompt");
 const sessionLabel = document.getElementById("sessionLabel");
 
+const reducedMotion =
+ window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ==========================================
+// OUTPUT QUEUE
+// ==========================================
+
+let outputQueue = Promise.resolve();
+let outputGeneration = 0;
+
 function print(text="",type=""){
- const div=document.createElement("div");
- div.className="line "+type;
- div.textContent=text;
- screen.appendChild(div);
- screen.scrollTop=screen.scrollHeight;
+ const generation=outputGeneration;
+
+ outputQueue=outputQueue.then(async()=>{
+  if(generation!==outputGeneration)return;
+
+  const div=document.createElement("div");
+  div.className="line "+type;
+  screen.appendChild(div);
+
+  const content=String(text);
+
+  if(reducedMotion || content.length===0){
+   div.textContent=content;
+   screen.scrollTop=screen.scrollHeight;
+   return;
+  }
+
+  // Typewriter effect.
+  for(let i=0;i<content.length;i++){
+   if(generation!==outputGeneration)return;
+
+   div.textContent=content.slice(0,i+1);
+   screen.scrollTop=screen.scrollHeight;
+
+   // Faster output for long records.
+   await new Promise(resolve=>
+    setTimeout(resolve,content.length>60?1:4)
+   );
+  }
+
+  screen.scrollTop=screen.scrollHeight;
+
+  await new Promise(resolve=>setTimeout(resolve,20));
+ });
+
+ return outputQueue;
 }
 
 function divider(){
  print("--------------------------------------------","system");
+}
+
+function clearScreen(){
+ outputGeneration++;
+ outputQueue=Promise.resolve();
+ screen.innerHTML="";
 }
 
 function updateSession(){
@@ -273,6 +367,7 @@ const seedNames=[
 function caesar(text,shift){
  return text.replace(/[a-z]/gi,char=>{
   const base=char===char.toUpperCase()?65:97;
+
   return String.fromCharCode(
    (char.charCodeAt(0)-base+shift+26)%26+base
   );
@@ -287,7 +382,6 @@ for(let i=0;i<70;i++){
 
  const className=classes[(i*7+3)%classes.length];
 
- // No numeric suffixes in agent identifiers.
  agents.push(["NP_"+alias,className]);
 }
 
@@ -701,7 +795,7 @@ function showStatus(){
  print("ACCESS LEVEL: "+
   (accessGranted?"ELEVATED":"STANDARD"));
 
- print("REGISTERED PROJECTS: 82");
+ print("REGISTERED PROJECTS: 02");
  print("REGISTERED AGENTS: "+agents.length);
  print("REGISTERED OPERATIONS: "+operations.length);
  print("DATABASE: MOUNTED");
@@ -875,12 +969,19 @@ function execute(){
  // ----------------------------------------
 
  if(command==="login"){
-  authenticate(raw.slice(raw.indexOf(" ")+1).trim());
+  const password=raw.slice(parts[0].length).trim();
+
+  if(!password){
+   print("USAGE: LOGIN <password>","warning");
+  }else{
+   authenticate(password);
+  }
+
   return;
  }
 
  if(command==="clear"){
-  screen.innerHTML="";
+  clearScreen();
   return;
  }
 
@@ -897,6 +998,7 @@ function execute(){
    print("EXECUTION BLOCKED.");
    print("USE: LOGIN <password>","warning");
   }
+
   return;
  }
 
@@ -933,14 +1035,17 @@ function execute(){
   divider();
  }
 
- else if(command==="about"||raw.toLowerCase()==="who's nullpad?"||
-         raw.toLowerCase()==="who's nullpad"){
+ else if(
+  command==="about"||
+  raw.toLowerCase()==="who's nullpad?"||
+  raw.toLowerCase()==="who's nullpad"
+ ){
   showNullpad();
  }
 
  else if(command==="version"){
   print("NULLPAD COMMAND INTERFACE");
-  print("VERSION: 1.1.0");
+  print("VERSION: 1.2.0");
   print("GATEWAY BUILD: NG-001");
   print("ACCESS CONTROL: ENABLED");
  }
@@ -958,8 +1063,11 @@ function execute(){
  }
 
  else if(command==="agents"){
-  if(argLower==="list"||!arg)showAgents();
-  else print("USAGE: Agents list","warning");
+  if(argLower==="list"||!arg){
+   showAgents();
+  }else{
+   print("USAGE: Agents list","warning");
+  }
  }
 
  else if(command==="data"){
@@ -1046,33 +1154,64 @@ input.addEventListener("keydown",e=>{
 });
 
 // ==========================================
-// INITIALIZATION
+// BOOT SEQUENCE
+// ==========================================
+
+async function boot(){
+
+ clearScreen();
+
+ const sleep=ms=>
+  new Promise(resolve=>setTimeout(resolve,ms));
+
+ const bootLine=async(text,type="system")=>{
+  await print(text,type);
+  await sleep(120);
+ };
+
+ await sleep(350);
+
+ await bootLine("NULLPAD NETWORK GATEWAY");
+ await bootLine("METAPHYSICAL SCIENCES DIVISION");
+ await bootLine("INITIALIZING NG-001...");
+ await bootLine("--------------------------------------------");
+
+ await bootLine("[ OK ] Local interface initialized.");
+ await bootLine("[ OK ] Command interpreter loaded.");
+ await bootLine("[ OK ] Database mounted.");
+ await bootLine("[ OK ] Agent registry indexed.");
+ await bootLine("[ OK ] Operation registry indexed.");
+ await bootLine("[ OK ] Archive integrity checked.");
+ await bootLine("[ OK ] Authentication service ready.");
+
+ await bootLine("--------------------------------------------");
+
+ await bootLine("SYSTEM INITIALIZATION: COMPLETE","success");
+ await bootLine("GATEWAY STATUS: ACTIVE","success");
+
+ await bootLine("REGISTERED AGENTS: "+agents.length);
+ await bootLine("REGISTERED OPERATIONS: "+operations.length);
+
+ await sleep(350);
+
+ await bootLine("--------------------------------------------");
+
+ await bootLine("AUTHENTICATION REQUIRED.","warning");
+ await bootLine("USE LOGIN <password> TO BEGIN.");
+ await bootLine("SESSION STATUS: LOCKED");
+
+ await bootLine("--------------------------------------------");
+
+ updateSession();
+ input.focus();
+}
+
+// ==========================================
+// START
 // ==========================================
 
 updateSession();
-
-print("NULLPAD NETWORK GATEWAY");
-print("METAPHYSICAL SCIENCES DIVISION");
-print("COMMAND INTERFACE VERSION 1.1.0");
-divider();
-
-print("GATEWAY INITIALIZATION COMPLETE.");
-print("LOCAL COMMAND INTERPRETER: READY");
-print("DATABASE: MOUNTED");
-print("ARCHIVE INDEX: LOADED");
-print("AUTHENTICATION SERVICE: READY");
-print("REGISTERED AGENTS: "+agents.length);
-print("REGISTERED OPERATIONS: "+operations.length);
-
-divider();
-
-print("AUTHENTICATION REQUIRED.","warning");
-print("USE LOGIN <password> TO BEGIN.");
-print("SESSION STATUS: LOCKED");
-
-divider();
-
-input.focus();
+boot();
 
 </script>
 </body>
