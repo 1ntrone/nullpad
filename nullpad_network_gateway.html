@@ -5,57 +5,189 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NULLPAD // NG-001</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#020502;color:#62ff80;font-family:Consolas,Monaco,monospace}
-.terminal{max-width:1100px;margin:auto;min-height:100vh;padding:22px;display:flex;flex-direction:column}
-.top{border-bottom:1px solid #246b36;padding-bottom:14px;margin-bottom:15px}
-.logo{font-size:25px;letter-spacing:5px;text-shadow:0 0 12px #36ff63}
-.muted{color:#39864c;font-size:12px}
-#screen{flex:1;min-height:65vh;overflow-y:auto;white-space:pre-wrap;line-height:1.55;font-size:13px}
+
+html,body{
+ margin:0;
+ width:100%;
+ height:100%;
+ overflow:hidden;
+}
+
+body{
+ background:#020502;
+ color:#62ff80;
+ font-family:Consolas,Monaco,monospace;
+}
+
+.terminal{
+ width:100%;
+ max-width:1100px;
+ height:100vh;
+ height:100dvh;
+ margin:auto;
+ padding:22px;
+ display:flex;
+ flex-direction:column;
+ overflow:hidden;
+}
+
+.top{
+ flex-shrink:0;
+ border-bottom:1px solid #246b36;
+ padding-bottom:14px;
+ margin-bottom:15px;
+}
+
+.logo{
+ font-size:25px;
+ letter-spacing:5px;
+ text-shadow:0 0 12px #36ff63;
+}
+
+.muted{
+ color:#39864c;
+ font-size:12px;
+ margin-top:4px;
+}
+
+#screen{
+ flex:1;
+ min-height:0;
+ overflow-y:auto;
+ overflow-x:hidden;
+ white-space:pre-wrap;
+ overflow-wrap:anywhere;
+ line-height:1.55;
+ font-size:13px;
+ padding-right:7px;
+ scrollbar-width:thin;
+ scrollbar-color:#246b36 #020502;
+}
+
 .line{margin:0 0 5px}
 .system{color:#54b86b}
 .error{color:#ff6464}
 .warning{color:#e5c66b}
-.inputrow{display:flex;gap:9px;align-items:center;border-top:1px solid #246b36;padding-top:14px}
-.prompt{white-space:nowrap}
-input{background:transparent;border:0;outline:0;color:#8aff9e;font:inherit;flex:1;min-width:0}
-button{background:#0b2110;border:1px solid #32894b;color:#70ff8a;padding:9px 15px;font:inherit;cursor:pointer}
-button:hover{background:#163a20}
-.footer{padding-top:12px;color:#347d45;font-size:11px}
+.dim{color:#39864c}
+.success{color:#8aff9e}
+
+.inputrow{
+ flex-shrink:0;
+ display:flex;
+ gap:9px;
+ align-items:center;
+ border-top:1px solid #246b36;
+ padding-top:14px;
+ margin-top:8px;
+}
+
+.prompt{
+ white-space:nowrap;
+ color:#62ff80;
+}
+
+input{
+ background:transparent;
+ border:0;
+ outline:0;
+ color:#8aff9e;
+ font:inherit;
+ flex:1;
+ min-width:0;
+ caret-color:#62ff80;
+}
+
+button{
+ background:#0b2110;
+ border:1px solid #32894b;
+ color:#70ff8a;
+ padding:9px 15px;
+ font:inherit;
+ cursor:pointer;
+}
+
+button:hover{
+ background:#163a20;
+ box-shadow:0 0 10px #246b36;
+}
+
+.footer{
+ flex-shrink:0;
+ padding-top:12px;
+ color:#347d45;
+ font-size:11px;
+ display:flex;
+ justify-content:space-between;
+ gap:8px;
+}
+
+#sessionLabel{color:#62ff80}
+
 #screen::-webkit-scrollbar{width:5px}
 #screen::-webkit-scrollbar-thumb{background:#246b36}
+
+@media(max-width:600px){
+ .terminal{padding:13px}
+ .logo{font-size:21px}
+ #screen{font-size:12px}
+ .footer{font-size:9px}
+ button{padding:8px 10px}
+}
 </style>
 </head>
+
 <body>
+
 <div class="terminal">
+
  <div class="top">
   <div class="logo">NULLPAD</div>
   <div class="muted">NETWORK GATEWAY // NG-001</div>
   <div class="muted">METAPHYSICAL SCIENCES DIVISION // COMMAND INTERFACE</div>
-  <div class="muted">SYSTEM STATUS: <span style="color:#62ff80">ACTIVE</span></div>
+  <div class="muted">
+   SYSTEM STATUS:
+   <span style="color:#62ff80">ACTIVE</span>
+  </div>
  </div>
 
  <div id="screen"></div>
 
  <div class="inputrow">
-  <span class="prompt">NP_ROOT &gt;</span>
-  <input id="command" autocomplete="off" spellcheck="false" autofocus>
+  <span class="prompt" id="prompt">LOGIN &gt;</span>
+  <input id="command" autocomplete="off"
+   spellcheck="false" autofocus>
   <button onclick="execute()">ENTER</button>
  </div>
- <div class="footer">NULLPAD TERMINAL // NG-001 // CLASS D SESSION</div>
+
+ <div class="footer">
+  <span>NULLPAD TERMINAL // NG-001</span>
+  <span id="sessionLabel">SESSION: LOCKED</span>
+ </div>
+
 </div>
 
 <script>
+
 // ==========================================
 // NULLPAD CONFIGURATION
 // ==========================================
 
+const LOGIN_PASSWORD = "NP-ARCHIVE-OP";
 const ACCESS_PASSWORD = "ARCH1VE";
+
+let authenticated = false;
 let accessGranted = false;
+
+let commandHistory = [];
+let historyPosition = 0;
 
 const screen = document.getElementById("screen");
 const input = document.getElementById("command");
+const prompt = document.getElementById("prompt");
+const sessionLabel = document.getElementById("sessionLabel");
 
 function print(text="",type=""){
  const div=document.createElement("div");
@@ -69,11 +201,45 @@ function divider(){
  print("--------------------------------------------","system");
 }
 
+function updateSession(){
+ prompt.textContent=authenticated?"NP_ROOT >":"LOGIN >";
+
+ sessionLabel.textContent=
+  !authenticated?"SESSION: LOCKED":
+  accessGranted?"SESSION: ELEVATED":
+  "SESSION: STANDARD";
+}
+
+function denied(required="ELEVATED"){
+ print("ACCESS DENIED.","error");
+ print("REQUIRED CLEARANCE: "+required,"warning");
+ print(
+  "CURRENT CLEARANCE: "+
+  (accessGranted?"ELEVATED":"STANDARD"),
+  "warning"
+ );
+ print("USE ACCESS TO REQUEST HIGHER CLEARANCE.");
+}
+
+function requireElevated(){
+ if(!authenticated){
+  print("AUTHENTICATION REQUIRED.","error");
+  return false;
+ }
+
+ if(!accessGranted){
+  denied();
+  return false;
+ }
+
+ return true;
+}
+
 // ==========================================
 // AGENT REGISTRY
 // ==========================================
 
-const agents = [
+const agents=[
  ["NP","OWNER"],
  ["NP_qbvm","D"],
  ["NP_zht","D"],
@@ -81,13 +247,13 @@ const agents = [
  ["test","A++"]
 ];
 
-const classes = [
+const classes=[
  "A++","A+","A","B++","B+","B",
  "C++","C+","C","D++","D+","D",
  "E++","E+","E","F"
 ];
 
-const seedNames = [
+const seedNames=[
  "observer","archive","signal","watcher","echo",
  "monitor","cipher","unknown","research","vector",
  "specter","memory","static","phantom","sector",
@@ -114,18 +280,22 @@ function caesar(text,shift){
 }
 
 for(let i=0;i<70;i++){
- const original=seedNames[i];
- const shift=i%2===0?-15:-20;
- const alias=caesar(original,shift);
+ const alias=caesar(
+  seedNames[i],
+  i%2===0?-15:-20
+ );
+
  const className=classes[(i*7+3)%classes.length];
- agents.push(["NP_"+alias+"_"+String(i+1).padStart(2,"0"),className]);
+
+ // No numeric suffixes in agent identifiers.
+ agents.push(["NP_"+alias,className]);
 }
 
 // ==========================================
 // OPERATION REGISTRY
 // ==========================================
 
-const subjects = [
+const subjects=[
  "Unidentified ambient audio",
  "Irregular terrain generation",
  "Missing world chunks",
@@ -152,14 +322,18 @@ const operations=[];
 
 for(let i=1;i<=80;i++){
  const subject=subjects[(i-1)%subjects.length];
+
  operations.push({
   id:"OP-"+String(i).padStart(3,"0"),
   name:subject,
-  status:i%9===0?"SUSPENDED":i%5===0?"UNDER REVIEW":"ACTIVE",
+  status:i%9===0?"SUSPENDED":
+         i%5===0?"UNDER REVIEW":"ACTIVE",
   class:classes[(i*3)%classes.length],
   description:
-   "Observation and documentation of "+subject.toLowerCase()+
-   ". Record environmental conditions, version information, timestamps and repeatability."
+   "Observation and documentation of "+
+   subject.toLowerCase()+
+   ". Record environmental conditions, version information, "+
+   "timestamps and repeatability."
  });
 }
 
@@ -201,6 +375,7 @@ const projects={
    "LIVE REACHABILITY: NOT VERIFIED"
   ]
  },
+
  "871":{
   name:"RASEBALO'S ANOMALY SERVER",
   address:"rasebalo.fun",
@@ -219,7 +394,7 @@ const projects={
 };
 
 // ==========================================
-// SYSTEM LOGS
+// EVENT LOG
 // ==========================================
 
 const logs=[
@@ -240,151 +415,247 @@ const logs=[
  "[12:30:00] Gateway status: ACTIVE."
 ];
 
+const auditLog=[];
+
+function audit(message){
+ const time=new Date().toLocaleTimeString();
+ auditLog.push("["+time+"] "+message);
+}
+
 // ==========================================
-// COMMAND OUTPUTS
+// HELP
 // ==========================================
 
 function showHelp(){
  divider();
  print("NULLPAD COMMAND REFERENCE");
+ print("SESSION CLEARANCE: "+
+  (accessGranted?"ELEVATED":"STANDARD"));
  divider();
+
  print("GENERAL");
  print(" Help                  - Command reference");
  print(" Clear                 - Clear terminal");
  print(" Status                - Gateway status");
- print(" About                 - Interface information");
+ print(" About                 - Division information");
  print(" Version               - Software version");
  print(" Date                  - System date");
- print(" Whoami                - Current session");
+ print(" Whoami                - Session information");
+
  print("");
- print("DIVISION");
- print(" Who's Nullpad?        - Division profile");
- print(" Service               - Service directory");
- print(" Agents list           - Agent registry");
- print(" Projects              - Registered projects");
- print(" Servers               - Network servers");
- print("");
- print("DATABASE");
- print(" Data                  - Database index");
- print(" Data open 001         - Open project 001");
- print(" Data open 871         - Open project 871");
- print(" Files                 - Archive index");
- print(" Logs                  - System event log");
- print("");
- print("OPERATIONS");
- print(" Operations            - Operation directory");
- print(" Operations status     - All operation statuses");
- print(" Operations open 081   - Special operation details");
- print("");
- print("ACCESS");
+ print("AUTHENTICATION");
+ print(" Login <password>      - Authenticate");
  print(" Access                - Access information");
- print(" Access <password>     - Authenticate");
- print(" Help                  - Display this list");
+ print(" Access <key>          - Request clearance");
+ print(" Logout                - End session");
+
+ print("");
+ print("STANDARD COMMANDS");
+ print(" Service               - Service directory");
+ print(" Projects              - Project directory");
+ print(" Servers               - Server directory");
+ print(" Data                  - Public database index");
+ print(" Data open 001         - Open public project");
+
+ print("");
+
+ if(accessGranted){
+  print("ELEVATED COMMANDS","success");
+  print(" Agents list           - Agent registry");
+  print(" Files                 - Restricted file index");
+  print(" Logs                  - System event log");
+  print(" Data open 871         - Restricted project");
+  print(" Operations            - Operation directory");
+  print(" Operations open <id>  - Operation details");
+ }else{
+  print("RESTRICTED COMMANDS","warning");
+  print(" Agents list           - [ELEVATED]");
+  print(" Files                 - [ELEVATED]");
+  print(" Logs                  - [ELEVATED]");
+  print(" Data open 871         - [ELEVATED]");
+  print(" Operations            - [ELEVATED]");
+ }
+
  divider();
 }
 
+// ==========================================
+// AGENTS
+// ==========================================
+
 function showAgents(){
+ if(!requireElevated())return;
+
  divider();
  print("NULLPAD // AGENT PERSONNEL REGISTRY");
  print("TOTAL REGISTERED: "+agents.length);
  divider();
- agents.forEach((a,i)=>{
-  print(String(i+1).padStart(3,"0")+" | "+a[0].padEnd(27)+" | CLASS "+a[1]);
+
+ agents.forEach(a=>{
+  print(a[0]+" | CLASS "+a[1]);
  });
+
  divider();
 }
+
+// ==========================================
+// SERVICES
+// ==========================================
 
 function showServices(){
  divider();
  print("NULLPAD SERVICE DIRECTORY");
  divider();
+
  print("SVC-001 // GATEWAY");
  print("Central network interface and project routing.");
  print("STATUS: ACTIVE");
+
  print("");
  print("SVC-002 // ARCHIVE MANAGEMENT");
  print("Indexes investigation files and preserves records.");
  print("STATUS: ACTIVE");
+
  print("");
  print("SVC-003 // PERSONNEL REGISTRY");
  print("Maintains agent identifiers and authorization classes.");
  print("STATUS: ACTIVE");
+
  print("");
  print("SVC-004 // OBSERVATION DESK");
  print("Receives reports and assigns investigation references.");
  print("STATUS: ACTIVE");
+
  print("");
  print("SVC-005 // SIGNAL ANALYSIS");
  print("Catalogues unusual audio and environmental reports.");
  print("STATUS: ACTIVE");
+
  print("");
  print("SVC-006 // WORLD INTEGRITY");
  print("Documents terrain, chunk and world-generation anomalies.");
  print("STATUS: ACTIVE");
+
  print("");
  print("SVC-007 // ACCESS CONTROL");
  print("Checks local authorization for restricted records.");
  print("STATUS: ACTIVE");
+
  divider();
 }
+
+// ==========================================
+// PROJECTS
+// ==========================================
 
 function showProjects(){
  divider();
  print("REGISTERED NETWORK PROJECTS");
  divider();
- Object.keys(projects).forEach(id=>{
-  const p=projects[id];
-  print("PROJECT "+id+" // "+p.name);
-  print("ADDRESS: "+p.address);
-  print("STATUS: "+p.status);
-  print("");
- });
+
+ print("PROJECT 001 // FRESHLlKE");
+ print("ADDRESS: freshlike.gaming");
+ print("STATUS: REGISTERED // ACTIVE CASE");
+ print("");
+
+ if(accessGranted){
+  print("PROJECT 871 // RASEBALO'S ANOMALY SERVER");
+  print("ADDRESS: rasebalo.fun");
+  print("STATUS: REGISTERED // ONGOING");
+ }else{
+  print("PROJECT 871 // [RESTRICTED RECORD]");
+  print("CLEARANCE REQUIRED: ELEVATED","warning");
+ }
+
+ print("");
  print("NOTE: Registration does not confirm live connectivity.");
  divider();
 }
 
+// ==========================================
+// DATABASE
+// ==========================================
+
 function openData(id){
  const p=projects[id];
+
  if(!p){
   print("DATABASE ERROR: FILE NOT FOUND.","error");
   return;
  }
+
+ if(id==="871"&&!requireElevated())return;
+
  divider();
  print("DATABASE FILE // PROJECT "+id);
  divider();
+
  p.notes.forEach(x=>print(x));
+
  print("");
  print("PROJECT DESCRIPTION:");
  print(p.description);
+
  print("");
  print("ARCHIVE STATUS: REGISTERED");
  print("INTERPRETATIONS: PROVISIONAL");
  divider();
+
+ audit("PROJECT "+id+" opened.");
 }
 
+function showDataIndex(){
+ divider();
+ print("DATABASE INDEX");
+ divider();
+ print("001 // FRESHLlKE ARCHIVE");
+
+ if(accessGranted){
+  print("871 // RASEBALO ARCHIVE");
+ }else{
+  print("871 // [RESTRICTED]");
+ }
+
+ print("");
+ print("USAGE: Data open <id>");
+ divider();
+}
+
+// ==========================================
+// OPERATIONS
+// ==========================================
+
 function showOperations(){
+ if(!requireElevated())return;
+
  divider();
  print("NULLPAD // OPERATIONS DIRECTORY");
  print("TOTAL OPERATIONS: "+operations.length);
  divider();
+
  operations.forEach(o=>{
-  print(o.id+" | "+o.name+" | "+o.status+" | CLASS "+o.class);
+  print(
+   o.id+" | "+o.name+" | "+
+   o.status+" | CLASS "+o.class
+  );
  });
+
  divider();
 }
 
 function operationDetails(id){
- const o=operations.find(x=>x.id===id.toUpperCase()||
-  x.id==="OP-"+id.padStart(3,"0"));
+ if(!requireElevated())return;
+
+ const o=operations.find(x=>
+  x.id===id.toUpperCase()||
+  x.id==="OP-"+id.padStart(3,"0")
+ );
+
  if(!o){
   print("OPERATION NOT FOUND.","error");
   return;
  }
- if(o.status==="RESTRICTED"&&!accessGranted){
-  print("ACCESS DENIED: RESTRICTED OPERATION.","error");
-  print("AUTHORIZATION REQUIRED. USE ACCESS.");
-  return;
- }
+
  divider();
  print("OPERATION RECORD // "+o.id);
  print("TITLE: "+o.name);
@@ -393,55 +664,189 @@ function operationDetails(id){
  print("");
  print(o.description);
  divider();
+
+ audit(o.id+" record opened.");
 }
 
+// ==========================================
+// LOGS
+// ==========================================
+
 function showLogs(){
+ if(!requireElevated())return;
+
  divider();
  print("NULLPAD // SYSTEM EVENT LOG");
  divider();
- logs.forEach(x=>print(x));
+
+ logs.concat(auditLog).forEach(x=>print(x));
+
  divider();
 }
+
+// ==========================================
+// STATUS
+// ==========================================
 
 function showStatus(){
  divider();
  print("GATEWAY STATUS REPORT");
+ divider();
+
  print("GATEWAY ID: NG-001");
  print("SYSTEM: ACTIVE");
+ print("AUTHENTICATION: VERIFIED");
  print("SESSION: OPERATIONAL");
- print("ACCESS LEVEL: CLASS D");
- print("REGISTERED PROJECTS: 02");
+
+ print("ACCESS LEVEL: "+
+  (accessGranted?"ELEVATED":"STANDARD"));
+
+ print("REGISTERED PROJECTS: 82");
  print("REGISTERED AGENTS: "+agents.length);
  print("REGISTERED OPERATIONS: "+operations.length);
  print("DATABASE: MOUNTED");
- print("ARCHIVE: AVAILABLE");
+ print("ARCHIVE: "+(accessGranted?"UNLOCKED":"RESTRICTED"));
  print("LIVE SERVER CONNECTION: NOT VERIFIED");
+
  divider();
 }
+
+// ==========================================
+// DIVISION PROFILE
+// ==========================================
 
 function showNullpad(){
  divider();
  print("NULLPAD // DIVISION PROFILE");
  divider();
+
  print("NULLPAD is a classified subdivision of the");
  print("Metaphysical Sciences Department, established in 2013.");
  print("");
+
  print("PRIMARY FIELD:");
  print("Minecraft server anomalies and irregular phenomena.");
  print("");
+
  print("The division documents unusual world behaviour,");
  print("terrain irregularities, unexplained sounds,");
  print("inconsistent mechanics and anomalous entities.");
  print("");
+
  print("Reports are treated as records, not conclusions.");
  print("Observations are preserved with version details,");
  print("timestamps and repeatability notes wherever available.");
  print("");
+
  print("FOUNDATION: 2013");
  print("PARENT: Metaphysical Sciences Department");
  print("REGISTERED PROJECTS: 02");
  print("RECORD STATUS: CLASSIFIED / ONGOING");
+
  divider();
+}
+
+// ==========================================
+// ACCESS CONTROL
+// ==========================================
+
+function showAccess(){
+ divider();
+ print("NULLPAD ACCESS CONTROL");
+ print("CLEARANCE MANAGEMENT INTERFACE");
+ divider();
+
+ print("AUTHENTICATION: ACCEPTED");
+ print("CURRENT CLEARANCE: "+
+  (accessGranted?"ELEVATED":"STANDARD"));
+
+ print("");
+ print("STANDARD CLEARANCE:");
+ print("Public project records and basic services.");
+
+ print("");
+ print("ELEVATED CLEARANCE:");
+ print("Restricted archives, personnel registry,");
+ print("system logs and operation records.");
+
+ print("");
+ print("USAGE: Access <authorization key>");
+
+ divider();
+}
+
+function authenticate(password){
+ if(authenticated){
+  print("SESSION ALREADY ACTIVE.","warning");
+  return;
+ }
+
+ if(password!==LOGIN_PASSWORD){
+  print("AUTHENTICATION FAILED.","error");
+  print("INVALID CREDENTIALS.");
+  audit("Failed login attempt.");
+  return;
+ }
+
+ authenticated=true;
+ accessGranted=false;
+
+ updateSession();
+
+ print("AUTHENTICATION ACCEPTED.","success");
+ print("SESSION: ACTIVE");
+ print("CLEARANCE: STANDARD");
+ print("WELCOME TO NULLPAD NETWORK GATEWAY.");
+
+ audit("Standard session authenticated.");
+}
+
+function grantAccess(key){
+ if(!authenticated){
+  print("AUTHENTICATION REQUIRED.","error");
+  print("LOGIN BEFORE REQUESTING CLEARANCE.");
+  return;
+ }
+
+ if(accessGranted){
+  print("ELEVATED CLEARANCE ALREADY ACTIVE.","warning");
+  return;
+ }
+
+ if(key!==ACCESS_PASSWORD){
+  print("AUTHORIZATION FAILED.","error");
+  print("INVALID AUTHORIZATION KEY.");
+  audit("Failed clearance request.");
+  return;
+ }
+
+ accessGranted=true;
+ updateSession();
+
+ print("AUTHORIZATION ACCEPTED.","success");
+ print("RESTRICTED SESSION ENABLED.");
+ print("CLEARANCE: ELEVATED");
+ print("RESTRICTED ARCHIVES: UNLOCKED");
+
+ audit("Elevated clearance granted.");
+}
+
+function logout(){
+ if(!authenticated){
+  print("NO ACTIVE SESSION.","warning");
+  return;
+ }
+
+ authenticated=false;
+ accessGranted=false;
+
+ updateSession();
+
+ print("SESSION TERMINATED.","warning");
+ print("ALL CLEARANCE PRIVILEGES REVOKED.");
+ print("AUTHENTICATION REQUIRED.");
+
+ audit("Session terminated.");
 }
 
 // ==========================================
@@ -451,137 +856,224 @@ function showNullpad(){
 function execute(){
  const raw=input.value.trim();
  if(!raw)return;
+
  input.value="";
 
- print("NP_ROOT > "+raw);
+ print((authenticated?"NP_ROOT > ":"LOGIN > ")+raw);
+
+ commandHistory.push(raw);
+ historyPosition=commandHistory.length;
+
  const parts=raw.split(/\s+/);
  const command=parts[0].toLowerCase();
- const arg=(parts[1]||"").toLowerCase();
- const arg2=(parts[2]||"").toLowerCase();
+ const arg=parts[1]||"";
+ const argLower=arg.toLowerCase();
+ const arg2=parts[2]||"";
+
+ // ----------------------------------------
+ // COMMANDS AVAILABLE BEFORE LOGIN
+ // ----------------------------------------
+
+ if(command==="login"){
+  authenticate(raw.slice(raw.indexOf(" ")+1).trim());
+  return;
+ }
 
  if(command==="clear"){
   screen.innerHTML="";
   return;
  }
 
- if(command==="help"){
+ if(!authenticated){
+  if(command==="help"){
+   divider();
+   print("NULLPAD NETWORK GATEWAY");
+   print("AUTHENTICATION REQUIRED.");
+   print("USAGE: LOGIN <password>");
+   print("SESSION STATUS: LOCKED");
+   divider();
+  }else{
+   print("AUTHENTICATION REQUIRED.","error");
+   print("EXECUTION BLOCKED.");
+   print("USE: LOGIN <password>","warning");
+  }
+  return;
+ }
+
+ // ----------------------------------------
+ // AUTHENTICATED COMMANDS
+ // ----------------------------------------
+
+ if(command==="logout"){
+  logout();
+ }
+
+ else if(command==="help"){
   showHelp();
  }
- else if(command==="agents"){
-  if(arg==="list"||!arg)showAgents();
-  else print("USAGE: Agents list","warning");
+
+ else if(command==="access"){
+  if(!arg){
+   showAccess();
+  }else{
+   grantAccess(raw.slice(raw.indexOf(" ")+1).trim());
+  }
  }
+
+ else if(command==="status"){
+  showStatus();
+ }
+
+ else if(command==="whoami"){
+  divider();
+  print("SESSION USER: NP_ROOT");
+  print("ACCESS CLASS: "+(accessGranted?"ELEVATED":"STANDARD"));
+  print("SESSION: ACTIVE");
+  print("AUTHENTICATION: VERIFIED");
+  divider();
+ }
+
+ else if(command==="about"||raw.toLowerCase()==="who's nullpad?"||
+         raw.toLowerCase()==="who's nullpad"){
+  showNullpad();
+ }
+
+ else if(command==="version"){
+  print("NULLPAD COMMAND INTERFACE");
+  print("VERSION: 1.1.0");
+  print("GATEWAY BUILD: NG-001");
+  print("ACCESS CONTROL: ENABLED");
+ }
+
+ else if(command==="date"){
+  print("LOCAL SYSTEM DATE: "+new Date().toLocaleString());
+ }
+
  else if(command==="service"||command==="services"){
   showServices();
  }
- else if(command==="servers"||command==="projects"){
+
+ else if(command==="projects"||command==="servers"){
   showProjects();
  }
+
+ else if(command==="agents"){
+  if(argLower==="list"||!arg)showAgents();
+  else print("USAGE: Agents list","warning");
+ }
+
  else if(command==="data"){
-  if(arg==="open"&&arg2){
+  if(argLower==="open"&&arg2){
    openData(arg2);
   }else{
-   divider();
-   print("DATABASE INDEX");
-   print("001 // FRESHLlKE ARCHIVE");
-   print("871 // RASEBALO ARCHIVE");
-   print("USAGE: Data open <id>");
-   divider();
+   showDataIndex();
   }
  }
+
  else if(command==="operations"){
-  if(arg==="status"||!arg){
+  if(argLower==="status"||!arg){
    showOperations();
-  }else if(arg==="open"&&arg2){
+  }else if(argLower==="open"&&arg2){
    operationDetails(arg2);
   }else{
    print("USAGE: Operations status");
    print("       Operations open <id>");
   }
  }
+
  else if(command==="logs"){
   showLogs();
  }
- else if(command==="status"){
-  showStatus();
- }
- else if(command==="who's"||raw.toLowerCase()==="who's nullpad?"||
-         raw.toLowerCase()==="who's nullpad"){
-  showNullpad();
- }
- else if(command==="about"){
-  showNullpad();
- }
- else if(command==="access"){
-  if(!arg){
-   divider();
-   print("NULLPAD ACCESS CONTROL");
-   print("Restricted records require an authorization key.");
-   print("USAGE: Access <password>");
-   print("SESSION ACCESS: "+(accessGranted?"ELEVATED":"CLASS D"));
-   divider();
-  }else if(raw.slice(raw.indexOf(" ")+1)===ACCESS_PASSWORD){
-   accessGranted=true;
-   print("AUTHORIZATION ACCEPTED.","system");
-   print("RESTRICTED SESSION ENABLED.");
-  }else{
-   print("AUTHORIZATION FAILED.","error");
-   print("INVALID ACCESS KEY.");
-  }
- }
+
  else if(command==="files"){
+  if(!requireElevated())return;
+
   divider();
   print("ARCHIVE FILE INDEX");
+  divider();
   print("DB-001 // FRESHLlKE");
   print("DB-871 // RASEBALO");
   print("OPERATION RECORDS // 082");
   print("PERSONNEL REGISTRY");
   print("SYSTEM LOGS");
+  print("ARCHIVE INTEGRITY: VERIFIED");
   divider();
  }
+
  else if(command==="connect"){
   print("REGISTERED ENDPOINTS:");
   print("freshlike.gaming");
   print("rasebalo.fun");
   print("LIVE REACHABILITY: NOT VERIFIED.","warning");
+  print("CONNECTION TEST: NOT PERFORMED.");
  }
- else if(command==="whoami"){
-  print("SESSION USER: NP_ROOT");
-  print("ACCESS CLASS: D");
-  print("SESSION: ACTIVE");
- }
- else if(command==="version"){
-  print("NULLPAD COMMAND INTERFACE");
-  print("VERSION: 1.0.0");
-  print("GATEWAY BUILD: NG-001");
- }
- else if(command==="date"){
-  print("LOCAL SYSTEM DATE: "+new Date().toLocaleString());
- }
- else if(command==="logout"){
-  accessGranted=false;
-  print("SESSION ACCESS RESET.");
- }
+
  else{
   print("UNKNOWN COMMAND: "+raw,"error");
   print("Type Help to see available commands.");
  }
 }
 
+// ==========================================
+// COMMAND HISTORY
+// ==========================================
+
 input.addEventListener("keydown",e=>{
- if(e.key==="Enter")execute();
+ if(e.key==="Enter"){
+  execute();
+ }
+
+ if(e.key==="ArrowUp"){
+  e.preventDefault();
+
+  if(historyPosition>0){
+   historyPosition--;
+   input.value=commandHistory[historyPosition];
+  }
+ }
+
+ if(e.key==="ArrowDown"){
+  e.preventDefault();
+
+  if(historyPosition<commandHistory.length-1){
+   historyPosition++;
+   input.value=commandHistory[historyPosition];
+  }else{
+   historyPosition=commandHistory.length;
+   input.value="";
+  }
+ }
 });
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+
+updateSession();
 
 print("NULLPAD NETWORK GATEWAY");
 print("METAPHYSICAL SCIENCES DIVISION");
-print("COMMAND INTERFACE VERSION 1.0.0");
+print("COMMAND INTERFACE VERSION 1.1.0");
 divider();
+
 print("GATEWAY INITIALIZATION COMPLETE.");
-print("SESSION STATUS: ACTIVE.");
+print("LOCAL COMMAND INTERPRETER: READY");
+print("DATABASE: MOUNTED");
+print("ARCHIVE INDEX: LOADED");
+print("AUTHENTICATION SERVICE: READY");
 print("REGISTERED AGENTS: "+agents.length);
 print("REGISTERED OPERATIONS: "+operations.length);
-print("TYPE Help TO DISPLAY COMMANDS.");
+
 divider();
+
+print("AUTHENTICATION REQUIRED.","warning");
+print("USE LOGIN <password> TO BEGIN.");
+print("SESSION STATUS: LOCKED");
+
+divider();
+
+input.focus();
+
 </script>
 </body>
 </html>
