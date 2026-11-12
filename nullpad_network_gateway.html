@@ -32,21 +32,105 @@ body{
  display:flex;
  flex-direction:column;
  overflow:hidden;
- animation:terminalStart 1.2s ease-out;
+
+ opacity:0;
+ transform:translateY(15px) scale(.985);
+ filter:brightness(.4);
+
+ animation:terminalEnter 1.3s cubic-bezier(.2,.8,.2,1) forwards;
 }
 
-@keyframes terminalStart{
- 0%{opacity:0;filter:brightness(0)}
- 45%{opacity:.65;filter:brightness(1.7)}
- 100%{opacity:1;filter:brightness(1)}
+@keyframes terminalEnter{
+ 0%{
+  opacity:0;
+  transform:translateY(15px) scale(.985);
+  filter:brightness(.4);
+ }
+ 45%{
+  opacity:1;
+  filter:brightness(1.5);
+ }
+ 100%{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  filter:brightness(1);
+ }
 }
+
+/* =================================
+   STARTUP INTERFACE ANIMATIONS
+================================= */
 
 .top{
  flex-shrink:0;
  border-bottom:1px solid #246b36;
  padding-bottom:14px;
  margin-bottom:15px;
+
+ opacity:0;
+ transform:translateY(-10px);
+ animation:panelEnter .7s ease-out .25s forwards;
 }
+
+#screen{
+ flex:1;
+ min-height:0;
+ overflow-y:auto;
+ overflow-x:hidden;
+ white-space:pre-wrap;
+ overflow-wrap:anywhere;
+ line-height:1.55;
+ font-size:13px;
+ padding-right:7px;
+ scrollbar-width:thin;
+ scrollbar-color:#246b36 #020502;
+
+ opacity:0;
+ animation:screenEnter .8s ease-out .45s forwards;
+}
+
+.inputrow{
+ flex-shrink:0;
+ display:flex;
+ gap:9px;
+ align-items:center;
+ border-top:1px solid #246b36;
+ padding-top:14px;
+ margin-top:8px;
+
+ opacity:0;
+ transform:translateY(10px);
+ animation:panelEnter .7s ease-out .65s forwards;
+}
+
+.footer{
+ flex-shrink:0;
+ padding-top:12px;
+ color:#347d45;
+ font-size:11px;
+ display:flex;
+ justify-content:space-between;
+ gap:8px;
+
+ opacity:0;
+ animation:screenEnter .7s ease-out .85s forwards;
+}
+
+@keyframes panelEnter{
+ to{
+  opacity:1;
+  transform:translateY(0);
+ }
+}
+
+@keyframes screenEnter{
+ from{opacity:0}
+ to{opacity:1}
+}
+
+/* =================================
+   LOGO
+================================= */
 
 .logo{
  font-size:25px;
@@ -66,33 +150,31 @@ body{
  margin-top:4px;
 }
 
-#screen{
- flex:1;
- min-height:0;
- overflow-y:auto;
- overflow-x:hidden;
- white-space:pre-wrap;
- overflow-wrap:anywhere;
- line-height:1.55;
- font-size:13px;
- padding-right:7px;
- scrollbar-width:thin;
- scrollbar-color:#246b36 #020502;
-}
+/* =================================
+   TERMINAL OUTPUT ANIMATIONS
+================================= */
 
 .line{
  margin:0 0 5px;
- animation:lineAppear .2s ease-out both;
+ opacity:0;
+ transform:translateY(7px);
+ animation:lineAppear .4s cubic-bezier(.2,.8,.2,1) forwards;
 }
 
 @keyframes lineAppear{
- from{
+ 0%{
   opacity:0;
-  transform:translateY(4px);
+  transform:translateY(7px);
+  text-shadow:0 0 0 transparent;
  }
- to{
+ 60%{
+  opacity:1;
+  text-shadow:0 0 8px currentColor;
+ }
+ 100%{
   opacity:1;
   transform:translateY(0);
+  text-shadow:none;
  }
 }
 
@@ -102,15 +184,9 @@ body{
 .dim{color:#39864c}
 .success{color:#8aff9e}
 
-.inputrow{
- flex-shrink:0;
- display:flex;
- gap:9px;
- align-items:center;
- border-top:1px solid #246b36;
- padding-top:14px;
- margin-top:8px;
-}
+/* =================================
+   INPUT
+================================= */
 
 .prompt{
  white-space:nowrap;
@@ -145,22 +221,13 @@ button{
  padding:9px 15px;
  font:inherit;
  cursor:pointer;
- transition:background .2s,box-shadow .2s;
+ transition:background .2s,box-shadow .2s,transform .2s;
 }
 
 button:hover{
  background:#163a20;
  box-shadow:0 0 10px #246b36;
-}
-
-.footer{
- flex-shrink:0;
- padding-top:12px;
- color:#347d45;
- font-size:11px;
- display:flex;
- justify-content:space-between;
- gap:8px;
+ transform:translateY(-1px);
 }
 
 #sessionLabel{color:#62ff80}
@@ -181,6 +248,7 @@ button:hover{
   animation-duration:.01ms!important;
   animation-iteration-count:1!important;
   transition-duration:.01ms!important;
+  scroll-behavior:auto!important;
  }
 }
 </style>
@@ -246,6 +314,10 @@ const reducedMotion =
 let outputQueue = Promise.resolve();
 let outputGeneration = 0;
 
+function sleep(ms){
+ return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
 function print(text="",type=""){
  const generation=outputGeneration;
 
@@ -258,6 +330,7 @@ function print(text="",type=""){
 
   const content=String(text);
 
+  // Reduced motion or empty text.
   if(reducedMotion || content.length===0){
    div.textContent=content;
    screen.scrollTop=screen.scrollHeight;
@@ -265,21 +338,22 @@ function print(text="",type=""){
   }
 
   // Typewriter effect.
+  // Short lines are slower; long lines are faster.
+  let speed=content.length>60?2:8;
+
   for(let i=0;i<content.length;i++){
    if(generation!==outputGeneration)return;
 
    div.textContent=content.slice(0,i+1);
    screen.scrollTop=screen.scrollHeight;
 
-   // Faster output for long records.
-   await new Promise(resolve=>
-    setTimeout(resolve,content.length>60?1:4)
-   );
+   await sleep(speed);
   }
 
   screen.scrollTop=screen.scrollHeight;
 
-  await new Promise(resolve=>setTimeout(resolve,20));
+  // Small pause before the next line.
+  await sleep(35);
  });
 
  return outputQueue;
@@ -1161,15 +1235,12 @@ async function boot(){
 
  clearScreen();
 
- const sleep=ms=>
-  new Promise(resolve=>setTimeout(resolve,ms));
-
  const bootLine=async(text,type="system")=>{
   await print(text,type);
   await sleep(120);
  };
 
- await sleep(350);
+ await sleep(500);
 
  await bootLine("NULLPAD NETWORK GATEWAY");
  await bootLine("METAPHYSICAL SCIENCES DIVISION");
