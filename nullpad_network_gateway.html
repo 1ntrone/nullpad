@@ -1,1271 +1,1431 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NULLPAD // NG-001</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NULLPAD // Internal Terminal</title>
 
 <style>
-*{box-sizing:border-box}
-
-html,body{
- margin:0;
- width:100%;
- height:100%;
- overflow:hidden;
+:root {
+    --bg: #080b0d;
+    --panel: #0d1316;
+    --green: #00ff9c;
+    --green-dim: #00a968;
+    --text: #c4d5ce;
+    --muted: #657b72;
+    --red: #ff4545;
+    --yellow: #ffc857;
+    --border: #183b30;
 }
 
-body{
- background:#020502;
- color:#62ff80;
- font-family:Consolas,Monaco,monospace;
+* {
+    box-sizing: border-box;
 }
 
-.terminal{
- width:100%;
- max-width:1100px;
- height:100vh;
- height:100dvh;
- margin:auto;
- padding:22px;
- display:flex;
- flex-direction:column;
- overflow:hidden;
- opacity:0;
- transform:translateY(15px) scale(.985);
- filter:brightness(.4);
- animation:terminalEnter 1.3s cubic-bezier(.2,.8,.2,1) forwards;
+body {
+    margin: 0;
+    padding: 20px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Consolas, "Courier New", monospace;
+    min-height: 100vh;
 }
 
-@keyframes terminalEnter{
- 0%{
-  opacity:0;
-  transform:translateY(15px) scale(.985);
-  filter:brightness(.4);
- }
- 45%{
-  opacity:1;
-  filter:brightness(1.5);
- }
- 100%{
-  opacity:1;
-  transform:translateY(0) scale(1);
-  filter:brightness(1);
- }
+.hidden {
+    display: none !important;
 }
 
-/* STARTUP PANELS */
-
-.top{
- flex-shrink:0;
- border-bottom:1px solid #246b36;
- padding-bottom:14px;
- margin-bottom:15px;
- opacity:0;
- transform:translateY(-10px);
- animation:panelEnter .7s ease-out .25s forwards;
+.login-box {
+    width: min(420px, 100%);
+    margin: 10vh auto;
+    padding: 28px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    box-shadow: 0 0 30px #00ff9c12;
 }
 
-#screen{
- flex:1;
- min-height:0;
- overflow-y:auto;
- overflow-x:hidden;
- white-space:pre-wrap;
- overflow-wrap:anywhere;
- line-height:1.55;
- font-size:13px;
- padding-right:7px;
- scrollbar-width:thin;
- scrollbar-color:#246b36 #020502;
- opacity:0;
- animation:screenEnter .8s ease-out .45s forwards;
+.logo {
+    color: var(--green);
+    font-size: 30px;
+    font-weight: bold;
+    letter-spacing: 5px;
+    text-align: center;
+    margin-bottom: 8px;
 }
 
-.inputrow{
- flex-shrink:0;
- display:flex;
- gap:9px;
- align-items:center;
- border-top:1px solid #246b36;
- padding-top:14px;
- margin-top:8px;
- opacity:0;
- transform:translateY(10px);
- animation:panelEnter .7s ease-out .65s forwards;
+.subtitle {
+    color: var(--muted);
+    text-align: center;
+    font-size: 11px;
+    margin-bottom: 28px;
 }
 
-.footer{
- flex-shrink:0;
- padding-top:12px;
- color:#347d45;
- font-size:11px;
- display:flex;
- justify-content:space-between;
- gap:8px;
- opacity:0;
- animation:screenEnter .7s ease-out .85s forwards;
+input, button {
+    font-family: inherit;
 }
 
-@keyframes panelEnter{
- to{
-  opacity:1;
-  transform:translateY(0);
- }
+.login-box input {
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    color: var(--green);
+    background: #050809;
+    border: 1px solid var(--border);
+    outline: none;
 }
 
-@keyframes screenEnter{
- from{opacity:0}
- to{opacity:1}
+button {
+    cursor: pointer;
 }
 
-/* LOGO */
-
-.logo{
- font-size:25px;
- letter-spacing:5px;
- text-shadow:0 0 12px #36ff63;
- animation:logoGlow 3s infinite alternate;
+.login-box button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 12px;
+    background: #06271b;
+    color: var(--green);
+    border: 1px solid var(--green-dim);
 }
 
-@keyframes logoGlow{
- from{text-shadow:0 0 5px #36ff63}
- to{text-shadow:0 0 18px #36ff63,0 0 30px #168b35}
+.login-box button:hover {
+    background: #0b3b29;
 }
 
-.muted{
- color:#39864c;
- font-size:12px;
- margin-top:4px;
+#loginError {
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 12px;
+    min-height: 16px;
 }
 
-/* OUTPUT LINES */
-
-.line{
- margin:0 0 5px;
- opacity:1;
- transform:translateY(0);
- white-space:pre-wrap;
- overflow-wrap:anywhere;
+.terminal {
+    max-width: 1100px;
+    margin: 0 auto;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    box-shadow: 0 0 30px #00ff9c0a;
 }
 
-.system{color:#54b86b}
-.error{color:#ff6464}
-.warning{color:#e5c66b}
-.dim{color:#39864c}
-.success{color:#8aff9e}
-
-/* INPUT */
-
-.prompt{
- white-space:nowrap;
- color:#62ff80;
+.topbar {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-.prompt::after{
- content:"█";
- margin-left:5px;
- animation:blink .8s steps(2,start) infinite;
+.topbar strong {
+    color: var(--green);
+    letter-spacing: 3px;
 }
 
-@keyframes blink{
- to{visibility:hidden}
+.status {
+    color: var(--green);
+    font-size: 12px;
 }
 
-input{
- background:transparent;
- border:0;
- outline:0;
- color:#8aff9e;
- font:inherit;
- flex:1;
- min-width:0;
- caret-color:#62ff80;
+.content {
+    padding: 20px;
 }
 
-button{
- background:#0b2110;
- border:1px solid #32894b;
- color:#70ff8a;
- padding:9px 15px;
- font:inherit;
- cursor:pointer;
- transition:background .2s,box-shadow .2s,transform .2s;
+.welcome {
+    color: var(--green);
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 20px;
 }
 
-button:hover{
- background:#163a20;
- box-shadow:0 0 10px #246b36;
- transform:translateY(-1px);
+#output {
+    min-height: 350px;
+    max-height: 58vh;
+    overflow-y: auto;
+    padding: 15px;
+    background: #050809;
+    border: 1px solid #142c24;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.55;
+    font-size: 13px;
 }
 
-#sessionLabel{color:#62ff80}
+.line {
+    margin-bottom: 5px;
+}
 
-#screen::-webkit-scrollbar{width:5px}
-#screen::-webkit-scrollbar-thumb{background:#246b36}
+.green { color: var(--green); }
+.red { color: var(--red); }
+.yellow { color: var(--yellow); }
+.muted { color: var(--muted); }
 
-@media(max-width:600px){
- .terminal{padding:13px}
- .logo{font-size:21px}
- #screen{font-size:12px}
- .footer{font-size:9px}
- button{padding:8px 10px}
+.input-row {
+    display: flex;
+    margin-top: 12px;
+    gap: 10px;
+}
+
+.prompt {
+    color: var(--green);
+    padding-top: 12px;
+}
+
+#commandInput {
+    flex: 1;
+    min-width: 0;
+    padding: 12px;
+    background: #050809;
+    border: 1px solid var(--border);
+    color: var(--green);
+    outline: none;
+}
+
+#commandInput:focus {
+    border-color: var(--green);
+}
+
+#sendButton {
+    padding: 0 20px;
+    color: var(--green);
+    background: #06271b;
+    border: 1px solid var(--green-dim);
+}
+
+.footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media(max-width: 600px) {
+    body { padding: 8px; }
+    .content { padding: 12px; }
+    #output { font-size: 12px; }
+    .prompt { display: none; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="terminal">
+<!-- LOGIN -->
+<div class="login-box" id="loginScreen">
+    <div class="logo">NULLPAD</div>
+    <div class="subtitle">INTERNAL ORGANIZATION TERMINAL // ACCESS REQUIRED</div>
 
- <div class="top">
-  <div class="logo">NULLPAD</div>
-  <div class="muted">NETWORK GATEWAY // NG-001</div>
-  <div class="muted">METAPHYSICAL SCIENCES DIVISION // COMMAND INTERFACE</div>
-  <div class="muted">
-   SYSTEM STATUS:
-   <span style="color:#62ff80">ACTIVE</span>
-  </div>
- </div>
+    <input id="loginInput" placeholder="USER ID" autocomplete="off">
+    <input id="passwordInput" type="password" placeholder="PASSWORD">
 
- <div id="screen"></div>
+    <button onclick="login()">AUTHORIZE ACCESS</button>
+    <div id="loginError"></div>
 
- <div class="inputrow">
-  <span class="prompt" id="prompt">LOGIN &gt;</span>
-  <input id="command" autocomplete="off"
-   spellcheck="false" autofocus>
-  <button onclick="execute()">ENTER</button>
- </div>
+    <div class="subtitle" style="margin-top:22px;margin-bottom:0">
+        UNAUTHORIZED ACCESS IS PROHIBITED
+    </div>
+</div>
 
- <div class="footer">
-  <span>NULLPAD TERMINAL // NG-001</span>
-  <span id="sessionLabel">SESSION: LOCKED</span>
- </div>
+<!-- TERMINAL -->
+<div class="terminal hidden" id="terminalScreen">
 
+    <div class="topbar">
+        <strong>NULLPAD // TERMINAL</strong>
+        <span class="status">● CONNECTION ESTABLISHED</span>
+    </div>
+
+    <div class="content">
+        <div class="welcome">
+            NULLPAD INTERNAL DATABASE<br>
+            SYSTEM STATUS: ONLINE<br>
+            ACCESS LEVEL: AUTHORIZED<br>
+            TYPE <span class="green">Help</span> TO VIEW AVAILABLE COMMANDS.
+        </div>
+
+        <div id="output"></div>
+
+        <div class="input-row">
+            <span class="prompt">NP://</span>
+            <input id="commandInput" placeholder="Enter command..." autocomplete="off">
+            <button id="sendButton" onclick="runCommand()">EXECUTE</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>NULLPAD INTERNAL NETWORK</span>
+        <span id="clock"></span>
+    </div>
 </div>
 
 <script>
+/* ==========================================
+   LOGIN CONFIGURATION
+   Демонстрационная авторизация.
+   Не является настоящей защитой данных.
+========================================== */
 
-// ==========================================
-// NULLPAD CONFIGURATION
-// ==========================================
+const LOGIN_USER = "admin";
+const LOGIN_PASSWORD = "NULLPAD";
 
-const LOGIN_PASSWORD = "NP-ARCHIVE-OP";
-const ACCESS_PASSWORD = "ARCH1VE";
+function login() {
+    const user = document.getElementById("loginInput").value.trim();
+    const password = document.getElementById("passwordInput").value;
 
-let authenticated = false;
-let accessGranted = false;
+    if (user === LOGIN_USER && password === LOGIN_PASSWORD) {
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("terminalScreen").classList.remove("hidden");
 
-let commandHistory = [];
-let historyPosition = 0;
-
-const screen = document.getElementById("screen");
-const input = document.getElementById("command");
-const prompt = document.getElementById("prompt");
-const sessionLabel = document.getElementById("sessionLabel");
-
-// ==========================================
-// OUTPUT QUEUE AND ANIMATIONS
-// ==========================================
-
-let outputQueue = Promise.resolve();
-let outputGeneration = 0;
-
-function sleep(ms){
- return new Promise(resolve=>setTimeout(resolve,ms));
+        print("NULLPAD SYSTEM INITIALIZED.", "green");
+        print("Welcome, " + user + ".", "green");
+        print("Database connection established.");
+        print("Type Help to view commands.");
+    } else {
+        document.getElementById("loginError").textContent =
+            "ACCESS DENIED // INVALID CREDENTIALS";
+    }
 }
 
-function nextFrame(){
- return new Promise(resolve=>requestAnimationFrame(resolve));
-}
-
-async function animateLine(div){
- div.style.opacity = "0";
- div.style.transform = "translateY(9px)";
- div.style.filter = "brightness(1.8)";
-
- await nextFrame();
- await nextFrame();
-
- div.animate(
-  [
-   {
-    opacity:0,
-    transform:"translateY(9px)",
-    filter:"brightness(1.8)"
-   },
-   {
-    opacity:1,
-    transform:"translateY(0)",
-    filter:"brightness(1)"
-   }
-  ],
-  {
-   duration:420,
-   easing:"cubic-bezier(.2,.8,.2,1)",
-   fill:"forwards"
-  }
- );
-}
-
-function print(text="",type=""){
- const generation = outputGeneration;
-
- outputQueue = outputQueue.then(async()=>{
-  if(generation !== outputGeneration)return;
-
-  const div = document.createElement("div");
-  div.className = "line " + type;
-
-  screen.appendChild(div);
-
-  await animateLine(div);
-
-  const content = String(text);
-
-  if(content.length === 0){
-   div.textContent = "";
-   screen.scrollTop = screen.scrollHeight;
-   return;
-  }
-
-  const speed =
-   content.length > 100 ? 1 :
-   content.length > 60 ? 2 : 8;
-
-  for(let i=0;i<content.length;i++){
-   if(generation !== outputGeneration)return;
-
-   div.textContent = content.slice(0,i+1);
-   screen.scrollTop = screen.scrollHeight;
-
-   await sleep(speed);
-  }
-
-  screen.scrollTop = screen.scrollHeight;
-  await sleep(65);
- });
-
- return outputQueue;
-}
-
-function divider(){
- print("--------------------------------------------","system");
-}
-
-function clearScreen(){
- outputGeneration++;
- outputQueue = Promise.resolve();
- screen.innerHTML = "";
-}
-
-function updateSession(){
- prompt.textContent = authenticated ? "NP_ROOT >" : "LOGIN >";
-
- sessionLabel.textContent =
-  !authenticated ? "SESSION: LOCKED" :
-  accessGranted ? "SESSION: ELEVATED" :
-  "SESSION: STANDARD";
-}
-
-function denied(required="ELEVATED"){
- print("ACCESS DENIED.","error");
- print("REQUIRED CLEARANCE: "+required,"warning");
- print(
-  "CURRENT CLEARANCE: "+
-  (accessGranted?"ELEVATED":"STANDARD"),
-  "warning"
- );
- print("USE ACCESS TO REQUEST HIGHER CLEARANCE.");
-}
-
-function requireElevated(){
- if(!authenticated){
-  print("AUTHENTICATION REQUIRED.","error");
-  return false;
- }
-
- if(!accessGranted){
-  denied();
-  return false;
- }
-
- return true;
-}
-
-// ==========================================
-// AGENT REGISTRY
-// ==========================================
-
-const agents=[
- ["NP","OWNER"],
- ["NP_qbvm","D"],
- ["NP_zht","D"],
- ["NP_","A"],
- ["test","A++"]
-];
-
-const classes=[
- "A++","A+","A","B++","B+","B",
- "C++","C+","C","D++","D+","D",
- "E++","E+","E","F"
-];
-
-const seedNames=[
- "observer","archive","signal","watcher","echo",
- "monitor","cipher","unknown","research","vector",
- "specter","memory","static","phantom","sector",
- "anomaly","witness","protocol","shadow","fragment",
- "terminal","locator","record","scanner","frequency",
- "network","instance","paradox","trace","silence",
- "operator","sentinel","baseline","resonance","gateway",
- "subsystem","recovery","horizon","artifact","channel",
- "sequence","repeater","null","vertex","pattern",
- "index","carrier","boundary","origin","reference",
- "isotope","contour","interval","cluster","signalman",
- "detector","archivex","observerx","monitorx","unknownx",
- "field","marker","transmitter","receiver","specimen",
- "relay","watch","matrix","source","endpoint"
-];
-
-function caesar(text,shift){
- return text.replace(/[a-z]/gi,char=>{
-  const base=char===char.toUpperCase()?65:97;
-
-  return String.fromCharCode(
-   (char.charCodeAt(0)-base+shift+26)%26+base
-  );
- });
-}
-
-for(let i=0;i<70;i++){
- const alias=caesar(
-  seedNames[i],
-  i%2===0?-15:-20
- );
-
- const className=classes[(i*7+3)%classes.length];
-
- agents.push(["NP_"+alias,className]);
-}
-
-// ==========================================
-// OPERATION REGISTRY
-// ==========================================
-
-const subjects=[
- "Unidentified ambient audio",
- "Irregular terrain generation",
- "Missing world chunks",
- "Unregistered underground structure",
- "Repeated environmental sound",
- "Abnormal entity behaviour",
- "Inconsistent world coordinates",
- "Unusual block formation",
- "Unexpected structure placement",
- "World-generation discrepancy",
- "Unidentified light source",
- "Unusual player reports",
- "Legacy world behaviour",
- "Unstable portal activity",
- "Unregistered entity appearance",
- "Repeated server event",
- "Unknown redstone activation",
- "Inconsistent biome boundaries",
- "Unusual cave geometry",
- "Unidentified audio sequence"
-];
-
-const operations=[];
-
-for(let i=1;i<=80;i++){
- const subject=subjects[(i-1)%subjects.length];
-
- operations.push({
-  id:"OP-"+String(i).padStart(3,"0"),
-  name:subject,
-  status:i%9===0?"SUSPENDED":
-         i%5===0?"UNDER REVIEW":"ACTIVE",
-  class:classes[(i*3)%classes.length],
-  description:
-   "Observation and documentation of "+
-   subject.toLowerCase()+
-   ". Record environmental conditions, version information, "+
-   "timestamps and repeatability."
- });
-}
-
-operations.push({
- id:"OP-081",
- name:"DEEP SIGNAL",
- status:"RESTRICTED",
- class:"A++",
- description:
- "SPECIAL OPERATION. Senior personnel investigate an unidentified signal reported in a restricted environment. Requires senior authorization, remote observation and documented withdrawal conditions."
+document.getElementById("passwordInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") login();
 });
 
-operations.push({
- id:"OP-082",
- name:"NULL HORIZON",
- status:"RESTRICTED",
- class:"A++",
- description:
- "SPECIAL OPERATION. Joint senior-staff investigation of a persistent world anomaly. Focus: environmental observation, archive preservation and controlled investigation review. Personnel participation requires separate authorization."
+document.getElementById("loginInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") login();
 });
 
-// ==========================================
-// PROJECT DATABASE
-// ==========================================
 
-const projects={
- "001":{
-  name:"FRESHLlKE",
-  address:"freshlike.gaming",
-  type:"MINECRAFT JAVA",
-  status:"REGISTERED // ACTIVE CASE",
-  description:
-  "FreshLike is a multiplayer Minecraft environment monitored by the Metaphysical Sciences Division. Reports concern unusual sounds, terrain irregularities, missing chunks and unexplained world behaviour.",
-  notes:[
-   "PROJECT ID: 001",
-   "SERVER: freshlike.gaming",
-   "NETWORK: MINECRAFT JAVA",
-   "OBSERVATION: ONGOING",
-   "LIVE REACHABILITY: NOT VERIFIED"
-  ]
- },
+/* ==========================================
+   AGENTS DATABASE
+========================================== */
 
- "871":{
-  name:"RASEBALO'S ANOMALY SERVER",
-  address:"rasebalo.fun",
-  type:"MINECRAFT JAVA",
-  status:"REGISTERED // ONGOING",
-  description:
-  "RaseCraft server environment associated with reports of extensive underground passages, audio irregularities and world-generation anomalies.",
-  notes:[
-   "PROJECT ID: 871",
-   "SERVER: rasebalo.fun",
-   "NETWORK: MINECRAFT JAVA",
-   "OBSERVATION: ONGOING",
-   "LIVE REACHABILITY: NOT VERIFIED"
-  ]
- }
-};
-
-// ==========================================
-// EVENT LOG
-// ==========================================
-
-const logs=[
- "[08:14:02] NG-001 gateway initialization complete.",
- "[08:14:05] Local command interpreter loaded.",
- "[08:14:08] Agent registry imported.",
- "[08:14:11] Project database mounted.",
- "[08:15:31] PROJECT 001 observation record updated.",
- "[08:17:09] Unusual audio report added to archive.",
- "[08:22:40] OP-014 status changed to UNDER REVIEW.",
- "[09:03:17] PROJECT 871 archive indexed.",
- "[09:41:52] Agent NP_qbvm accessed investigation archive.",
- "[10:12:04] OP-081 access classification confirmed.",
- "[10:30:18] Background archive verification completed.",
- "[11:06:45] Network reachability check unavailable.",
- "[11:42:21] OP-082 marked RESTRICTED.",
- "[12:01:03] Session integrity check passed.",
- "[12:30:00] Gateway status: ACTIVE."
+const agents = [
+    {
+        id: "NP",
+        name: "NP",
+        role: "DIRECTOR",
+        department: "DEP-001",
+        description: "Руководит организацией NULLPAD.",
+        responsibilities: [
+            "Общее управление организацией",
+            "Утверждение крупных проектов",
+            "Контроль деятельности отделов",
+            "Принятие важных организационных решений"
+        ]
+    },
+    {
+        id: "NP_qbvm",
+        name: "NP_qbvm",
+        role: "OPERATIONS COORDINATOR",
+        department: "DEP-002",
+        description: "Координирует выполнение операций.",
+        responsibilities: [
+            "Назначение ответственных агентов",
+            "Контроль статуса операций",
+            "Координация между отделами",
+            "Подготовка операционных сводок"
+        ]
+    },
+    {
+        id: "NP_zht",
+        name: "NP_zht",
+        role: "PROJECT MANAGER",
+        department: "DEP-003",
+        description: "Отвечает за разработку и управление проектами.",
+        responsibilities: [
+            "Создание новых проектов",
+            "Разработка проектных планов",
+            "Назначение проектных команд",
+            "Контроль проектной документации"
+        ]
+    },
+    {
+        id: "NP_",
+        name: "NP_",
+        role: "REPORTING SPECIALIST",
+        department: "DEP-004",
+        description: "Отвечает за подготовку отчётов.",
+        responsibilities: [
+            "Составление отчётов об операциях",
+            "Оформление документации",
+            "Подготовка итоговых сводок",
+            "Передача отчётов руководству"
+        ]
+    },
+    {
+        id: "test",
+        name: "test",
+        role: "RESEARCH AGENT",
+        department: "DEP-005",
+        description: "Собирает и систематизирует информацию.",
+        responsibilities: [
+            "Сбор доступной информации",
+            "Изучение игровых объектов и аномалий",
+            "Подготовка исследовательских заметок",
+            "Передача материалов аналитическому отделу"
+        ]
+    }
 ];
 
-const auditLog=[];
 
-function audit(message){
- const time=new Date().toLocaleTimeString();
- auditLog.push("["+time+"] "+message);
+/* ==========================================
+   DEPARTMENTS DATABASE
+========================================== */
+
+const departments = [
+    {
+        id: "DEP-001",
+        name: "DIVISION COMMAND",
+        leader: "NP",
+        purpose: "Главное руководство NULLPAD.",
+        tasks: [
+            "Управление организацией",
+            "Утверждение проектов и операций",
+            "Контроль работы отделов",
+            "Принятие окончательных решений"
+        ]
+    },
+    {
+        id: "DEP-002",
+        name: "OPERATIONS COORDINATION",
+        leader: "NP_qbvm",
+        purpose: "Планирование и координация операций.",
+        tasks: [
+            "Создание операционных планов",
+            "Назначение агентов",
+            "Контроль выполнения операций",
+            "Обновление статусов"
+        ]
+    },
+    {
+        id: "DEP-003",
+        name: "PROJECT DEVELOPMENT",
+        leader: "NP_zht",
+        purpose: "Разработка и управление проектами.",
+        tasks: [
+            "Создание проектов",
+            "Разработка проектной документации",
+            "Организация проектных команд",
+            "Связь проектов с операциями"
+        ]
+    },
+    {
+        id: "DEP-004",
+        name: "REPORTING DEPARTMENT",
+        leader: "NP_",
+        purpose: "Подготовка и хранение отчётности.",
+        tasks: [
+            "Написание отчётов",
+            "Сбор результатов операций",
+            "Подготовка итоговых документов",
+            "Передача информации руководству"
+        ]
+    },
+    {
+        id: "DEP-005",
+        name: "RESEARCH AND INTELLIGENCE",
+        leader: "test",
+        purpose: "Исследование и сбор информации.",
+        tasks: [
+            "Сбор информации",
+            "Исследование игровых объектов",
+            "Подготовка исследовательских материалов",
+            "Передача информации другим отделам"
+        ]
+    },
+    {
+        id: "DEP-006",
+        name: "FIELD OBSERVATION",
+        leader: "NP_qbvm",
+        purpose: "Наблюдение за игровыми объектами и территориями.",
+        tasks: [
+            "Фиксация изменений",
+            "Наблюдение за объектами",
+            "Передача наблюдений исследователям",
+            "Подготовка полевых заметок"
+        ]
+    },
+    {
+        id: "DEP-007",
+        name: "ANALYSIS AND ARCHIVE",
+        leader: "NP_zht",
+        purpose: "Анализ и архивирование материалов.",
+        tasks: [
+            "Систематизация данных",
+            "Сравнение отчётов",
+            "Хранение архивных записей",
+            "Подготовка аналитических заключений"
+        ]
+    }
+];
+
+
+/* ==========================================
+   PROJECT DATABASE
+========================================== */
+
+const projects = [
+    {
+        id: "001",
+        name: "PROJECT: NULL ZONE",
+        status: "ACTIVE",
+        classification: "INTERNAL",
+        manager: "NP_zht",
+        created: "2026-02-14",
+        location: "Minecraft // Sector 01",
+        description:
+            "Проект по изучению необычных игровых территорий и документированию обнаруженных явлений.",
+        objective:
+            "Создать систематизированную базу наблюдений, связанных с NULL ZONE.",
+        team: ["NP_zht", "NP_qbvm", "test", "NP_"],
+        operations: ["OP-001", "OP-003", "OP-081"],
+        reports: [
+            {
+                id: "RPT-001",
+                author: "NP_",
+                date: "2026-02-18",
+                title: "Initial Project Report",
+                content: "Подготовлена начальная документация проекта. Создан список объектов для дальнейшего изучения."
+            },
+            {
+                id: "RPT-002",
+                author: "test",
+                date: "2026-02-21",
+                title: "Research Summary",
+                content: "Собраны первые исследовательские заметки. Материалы переданы руководителю проекта."
+            }
+        ],
+        history: [
+            "2026-02-14 // Проект создан агентом NP_zht.",
+            "2026-02-15 // Назначена проектная команда.",
+            "2026-02-18 // Добавлен первый отчёт.",
+            "2026-02-21 // Добавлены исследовательские материалы."
+        ]
+    },
+    {
+        id: "871",
+        name: "PROJECT: ECHO ARCHIVE",
+        status: "UNDER REVIEW",
+        classification: "RESTRICTED",
+        manager: "NP",
+        created: "2026-03-02",
+        location: "Minecraft // Archive Sector",
+        description:
+            "Архивный проект для систематизации старых записей, отчётов и сведений об игровых аномалиях.",
+        objective:
+            "Объединить разрозненные документы в единую архивную базу NULLPAD.",
+        team: ["NP", "NP_", "NP_zht", "test"],
+        operations: ["OP-002", "OP-005", "OP-082"],
+        reports: [
+            {
+                id: "RPT-871-01",
+                author: "NP_",
+                date: "2026-03-05",
+                title: "Archive Review",
+                content: "Проведена проверка доступных архивных записей. Часть материалов ожидает классификации."
+            },
+            {
+                id: "RPT-871-02",
+                author: "NP_zht",
+                date: "2026-03-09",
+                title: "Archive Structure",
+                content: "Подготовлена предварительная структура архива и список связанных операций."
+            }
+        ],
+        history: [
+            "2026-03-02 // Проект создан.",
+            "2026-03-03 // Назначен руководитель проекта.",
+            "2026-03-05 // Добавлен первый архивный отчёт.",
+            "2026-03-09 // Обновлена структура архива."
+        ]
+    }
+];
+
+
+/* ==========================================
+   OPERATIONS DATABASE
+========================================== */
+
+const operations = [
+    {
+        id: "OP-001",
+        title: "INITIAL SECTOR OBSERVATION",
+        status: "COMPLETED",
+        classification: "INTERNAL",
+        director: "NP",
+        coordinator: "NP_qbvm",
+        project: "001",
+        date: "2026-02-15",
+        location: "Sector 01",
+        objective: "Зафиксировать первоначальные сведения о выбранной территории.",
+        description: "Начальная операция проекта NULL ZONE. Основная задача заключалась в сборе базовых наблюдений.",
+        agents: ["NP_qbvm", "test"],
+        departments: ["DEP-002", "DEP-005", "DEP-006"],
+        reports: [
+            {
+                id: "RPT-OP001-01",
+                author: "NP_",
+                date: "2026-02-16",
+                title: "Initial Observation Report",
+                content: "Первичные наблюдения собраны и переданы в исследовательский отдел."
+            }
+        ],
+        history: [
+            "2026-02-15 // Операция зарегистрирована.",
+            "2026-02-15 // Назначены ответственные агенты.",
+            "2026-02-16 // Получен первый отчёт.",
+            "2026-02-17 // Статус изменён на COMPLETED."
+        ],
+        conclusion: "Первоначальный сбор информации завершён. Материалы добавлены в проект NULL ZONE."
+    },
+    {
+        id: "OP-002",
+        title: "ARCHIVE DOCUMENT REVIEW",
+        status: "COMPLETED",
+        classification: "RESTRICTED",
+        director: "NP",
+        coordinator: "NP_qbvm",
+        project: "871",
+        date: "2026-03-03",
+        location: "Archive Sector",
+        objective: "Проверить и систематизировать доступные архивные документы.",
+        description: "Операция направлена на проверку старых записей и выявление документов, требующих обновления.",
+        agents: ["NP_", "NP_zht"],
+        departments: ["DEP-003", "DEP-004", "DEP-007"],
+        reports: [
+            {
+                id: "RPT-OP002-01",
+                author: "NP_",
+                date: "2026-03-05",
+                title: "Document Review",
+                content: "Документы проверены. Составлен перечень материалов, требующих дополнительной классификации."
+            }
+        ],
+        history: [
+            "2026-03-03 // Операция зарегистрирована.",
+            "2026-03-04 // Начата проверка документов.",
+            "2026-03-05 // Подготовлен отчёт.",
+            "2026-03-06 // Операция завершена."
+        ],
+        conclusion: "Основная проверка завершена. Материалы переданы в архив."
+    },
+    {
+        id: "OP-003",
+        title: "NULL ZONE DATA COLLECTION",
+        status: "ACTIVE",
+        classification: "INTERNAL",
+        director: "NP",
+        coordinator: "NP_qbvm",
+        project: "001",
+        date: "2026-02-20",
+        location: "Sector 01",
+        objective: "Продолжить сбор информации о территории NULL ZONE.",
+        description: "Операция включает сбор заметок, наблюдений и сведений для исследовательской базы.",
+        agents: ["test", "NP_qbvm"],
+        departments: ["DEP-002", "DEP-005", "DEP-006"],
+        reports: [
+            {
+                id: "RPT-OP003-01",
+                author: "test",
+                date: "2026-02-22",
+                title: "Data Collection Note",
+                content: "Добавлены новые наблюдения. Информация ожидает дополнительной проверки."
+            }
+        ],
+        history: [
+            "2026-02-20 // Операция создана.",
+            "2026-02-21 // Назначены агенты.",
+            "2026-02-22 // Получена первая заметка."
+        ],
+        conclusion: "Операция продолжается. Ожидается дополнительная информация."
+    },
+    {
+        id: "OP-004",
+        title: "REPORT DATABASE UPDATE",
+        status: "COMPLETED",
+        classification: "INTERNAL",
+        director: "NP",
+        coordinator: "NP_qbvm",
+        project: "001",
+        date: "2026-02-23",
+        location: "NULLPAD Database",
+        objective: "Обновить структуру базы отчётов.",
+        description: "Проверка формата отчётности и добавление новых записей.",
+        agents: ["NP_", "NP_zht"],
+        departments: ["DEP-003", "DEP-004", "DEP-007"],
+        reports: [
+            {
+                id: "RPT-OP004-01",
+                author: "NP_",
+                date: "2026-02-24",
+                title: "Database Update Report",
+                content: "Структура отчётов обновлена. Новые документы добавлены в базу."
+            }
+        ],
+        history: [
+            "2026-02-23 // Операция зарегистрирована.",
+            "2026-02-24 // Обновлена база.",
+            "2026-02-25 // Операция завершена."
+        ],
+        conclusion: "База отчётов обновлена."
+    },
+    {
+        id: "OP-005",
+        title: "ECHO ARCHIVE CLASSIFICATION",
+        status: "UNDER REVIEW",
+        classification: "RESTRICTED",
+        director: "NP",
+        coordinator: "NP_qbvm",
+        project: "871",
+        date: "2026-03-07",
+        location: "Archive Sector",
+        objective: "Классифицировать архивные документы по категориям.",
+        description: "Документы проекта ECHO ARCHIVE распределяются по типам и степени актуальности.",
+        agents: ["NP_", "test"],
+        departments: ["DEP-004", "DEP-005", "DEP-007"],
+        reports: [
+            {
+                id: "RPT-OP005-01",
+                author: "NP_",
+                date: "2026-03-08",
+                title: "Classification Progress",
+                content: "Часть документов классифицирована. Остальные ожидают проверки."
+            }
+        ],
+        history: [
+            "2026-03-07 // Операция создана.",
+            "2026-03-08 // Начата классификация.",
+            "2026-03-09 // Статус изменён на UNDER REVIEW."
+        ],
+        conclusion: "Операция находится на проверке."
+    },
+    {
+        id: "OP-081",
+        title: "ANOMALOUS AREA DOCUMENTATION",
+        status: "ACTIVE",
+        classification: "RESTRICTED",
+        director: "NP",
+        coordinator: "NP_qbvm",
+        project: "001",
+        date: "2026-04-10",
+        location: "Sector 08 // Minecraft",
+        objective: "Подготовить документированное описание необычной игровой области.",
+        description: "Операция посвящена фиксации особенностей выбранной области, сбору наблюдений и подготовке единого отчёта.",
+        agents: ["NP_qbvm", "test", "NP_"],
+        departments: ["DEP-002", "DEP-004", "DEP-005", "DEP-006"],
+        reports: [
+            {
+                id: "RPT-081-01",
+                author: "test",
+                date: "2026-04-11",
+                title: "Preliminary Research Notes",
+                content: "Собраны предварительные сведения об области. Требуется дополнительная проверка наблюдений."
+            },
+            {
+                id: "RPT-081-02",
+                author: "NP_",
+                date: "2026-04-12",
+                title: "Documentation Progress",
+                content: "Подготовлена структура итогового отчёта. Часть информации ожидает подтверждения."
+            }
+        ],
+        history: [
+            "2026-04-10 // OP-081 зарегистрирована.",
+            "2026-04-10 // Координатором назначен NP_qbvm.",
+            "2026-04-11 // Получены исследовательские заметки.",
+            "2026-04-12 // Добавлен отчёт о ходе документирования."
+        ],
+        conclusion: "Операция активна. Итоговое заключение будет добавлено после завершения сбора данных."
+    },
+    {
+        id: "OP-082",
+        title: "ARCHIVE DATA CONSOLIDATION",
+        status: "UNDER REVIEW",
+        classification: "RESTRICTED",
+        director: "NP",
+        coordinator: "NP_qbvm",
+        project: "871",
+        date: "2026-04-14",
+        location: "NULLPAD Archive",
+        objective: "Объединить связанные архивные материалы в единую запись.",
+        description: "Операция предусматривает проверку связанных документов, устранение повторяющихся записей и подготовку архивной сводки.",
+        agents: ["NP_zht", "NP_", "test"],
+        departments: ["DEP-003", "DEP-004", "DEP-005", "DEP-007"],
+        reports: [
+            {
+                id: "RPT-082-01",
+                author: "NP_",
+                date: "2026-04-15",
+                title: "Consolidation Report",
+                content: "Начата проверка связанных материалов. Подготовлен список документов для объединения."
+            }
+        ],
+        history: [
+            "2026-04-14 // OP-082 зарегистрирована.",
+            "2026-04-14 // Назначена проектная группа.",
+            "2026-04-15 // Получен первый отчёт.",
+            "2026-04-16 // Операция передана на проверку."
+        ],
+        conclusion: "Архивная консолидация продолжается. Ожидается итоговая проверка."
+    }
+];
+
+
+/* ==========================================
+   OUTPUT SYSTEM
+========================================== */
+
+const output = document.getElementById("output");
+
+function print(message, color = "") {
+    const line = document.createElement("div");
+    line.className = "line " + color;
+    line.textContent = message;
+    output.appendChild(line);
+    output.scrollTop = output.scrollHeight;
 }
 
-// ==========================================
-// HELP
-// ==========================================
-
-function showHelp(){
- divider();
- print("NULLPAD COMMAND REFERENCE");
- print("SESSION CLEARANCE: "+
-  (accessGranted?"ELEVATED":"STANDARD"));
- divider();
-
- print("GENERAL");
- print(" Help                  - Command reference");
- print(" Clear                 - Clear terminal");
- print(" Status                - Gateway status");
- print(" About                 - Division information");
- print(" Version               - Software version");
- print(" Date                  - System date");
- print(" Whoami                - Session information");
-
- print("");
- print("AUTHENTICATION");
- print(" Login <password>      - Authenticate");
- print(" Access                - Access information");
- print(" Access <key>          - Request clearance");
- print(" Logout                - End session");
-
- print("");
- print("STANDARD COMMANDS");
- print(" Service               - Service directory");
- print(" Projects              - Project directory");
- print(" Servers               - Server directory");
- print(" Data                  - Public database index");
- print(" Data open 001         - Open public project");
-
- print("");
-
- if(accessGranted){
-  print("ELEVATED COMMANDS","success");
-  print(" Agents list           - Agent registry");
-  print(" Files                 - Restricted file index");
-  print(" Logs                  - System event log");
-  print(" Data open 871         - Restricted project");
-  print(" Operations            - Operation directory");
-  print(" Operations open <id>  - Operation details");
- }else{
-  print("RESTRICTED COMMANDS","warning");
-  print(" Agents list           - [ELEVATED]");
-  print(" Files                 - [ELEVATED]");
-  print(" Logs                  - [ELEVATED]");
-  print(" Data open 871         - [ELEVATED]");
-  print(" Operations            - [ELEVATED]");
- }
-
- divider();
+function printBlank() {
+    print("");
 }
 
-// ==========================================
-// AGENTS
-// ==========================================
-
-function showAgents(){
- if(!requireElevated())return;
-
- divider();
- print("NULLPAD // AGENT PERSONNEL REGISTRY");
- print("TOTAL REGISTERED: "+agents.length);
- divider();
-
- agents.forEach(a=>{
-  print(a[0]+" | CLASS "+a[1]);
- });
-
- divider();
+function heading(text) {
+    print("========================================", "muted");
+    print(text, "green");
+    print("========================================", "muted");
 }
 
-// ==========================================
-// SERVICES
-// ==========================================
-
-function showServices(){
- divider();
- print("NULLPAD SERVICE DIRECTORY");
- divider();
-
- print("SVC-001 // GATEWAY");
- print("Central network interface and project routing.");
- print("STATUS: ACTIVE");
-
- print("");
- print("SVC-002 // ARCHIVE MANAGEMENT");
- print("Indexes investigation files and preserves records.");
- print("STATUS: ACTIVE");
-
- print("");
- print("SVC-003 // PERSONNEL REGISTRY");
- print("Maintains agent identifiers and authorization classes.");
- print("STATUS: ACTIVE");
-
- print("");
- print("SVC-004 // OBSERVATION DESK");
- print("Receives reports and assigns investigation references.");
- print("STATUS: ACTIVE");
-
- print("");
- print("SVC-005 // SIGNAL ANALYSIS");
- print("Catalogues unusual audio and environmental reports.");
- print("STATUS: ACTIVE");
-
- print("");
- print("SVC-006 // WORLD INTEGRITY");
- print("Documents terrain, chunk and world-generation anomalies.");
- print("STATUS: ACTIVE");
-
- print("");
- print("SVC-007 // ACCESS CONTROL");
- print("Checks local authorization for restricted records.");
- print("STATUS: ACTIVE");
-
- divider();
+function field(label, value) {
+    print(label.padEnd(19, " ") + ": " + value);
 }
 
-// ==========================================
-// PROJECTS
-// ==========================================
-
-function showProjects(){
- divider();
- print("REGISTERED NETWORK PROJECTS");
- divider();
-
- print("PROJECT 001 // FRESHLlKE");
- print("ADDRESS: freshlike.gaming");
- print("STATUS: REGISTERED // ACTIVE CASE");
- print("");
-
- if(accessGranted){
-  print("PROJECT 871 // RASEBALO'S ANOMALY SERVER");
-  print("ADDRESS: rasebalo.fun");
-  print("STATUS: REGISTERED // ONGOING");
- }else{
-  print("PROJECT 871 // [RESTRICTED RECORD]");
-  print("CLEARANCE REQUIRED: ELEVATED","warning");
- }
-
- print("");
- print("NOTE: Registration does not confirm live connectivity.");
- divider();
+function notFound(type, id) {
+    print(type + " NOT FOUND: " + id, "red");
+    print("Check the ID and try again.", "muted");
 }
 
-// ==========================================
-// DATABASE
-// ==========================================
-
-function openData(id){
- const p=projects[id];
-
- if(!p){
-  print("DATABASE ERROR: FILE NOT FOUND.","error");
-  return;
- }
-
- if(id==="871"&&!requireElevated())return;
-
- divider();
- print("DATABASE FILE // PROJECT "+id);
- divider();
-
- p.notes.forEach(x=>print(x));
-
- print("");
- print("PROJECT DESCRIPTION:");
- print(p.description);
-
- print("");
- print("ARCHIVE STATUS: REGISTERED");
- print("INTERPRETATIONS: PROVISIONAL");
- divider();
-
- audit("PROJECT "+id+" opened.");
+function getAgent(id) {
+    return agents.find(a => a.id.toLowerCase() === id.toLowerCase());
 }
 
-function showDataIndex(){
- divider();
- print("DATABASE INDEX");
- divider();
- print("001 // FRESHLlKE ARCHIVE");
-
- if(accessGranted){
-  print("871 // RASEBALO ARCHIVE");
- }else{
-  print("871 // [RESTRICTED]");
- }
-
- print("");
- print("USAGE: Data open <id>");
- divider();
+function getDepartment(id) {
+    return departments.find(d => d.id.toLowerCase() === id.toLowerCase());
 }
 
-// ==========================================
-// OPERATIONS
-// ==========================================
-
-function showOperations(){
- if(!requireElevated())return;
-
- divider();
- print("NULLPAD // OPERATIONS DIRECTORY");
- print("TOTAL OPERATIONS: "+operations.length);
- divider();
-
- operations.forEach(o=>{
-  print(
-   o.id+" | "+o.name+" | "+
-   o.status+" | CLASS "+o.class
-  );
- });
-
- divider();
+function getOperation(id) {
+    return operations.find(o => o.id.toLowerCase() === id.toLowerCase());
 }
 
-function operationDetails(id){
- if(!requireElevated())return;
-
- const o=operations.find(x=>
-  x.id===id.toUpperCase()||
-  x.id==="OP-"+id.padStart(3,"0")
- );
-
- if(!o){
-  print("OPERATION NOT FOUND.","error");
-  return;
- }
-
- divider();
- print("OPERATION RECORD // "+o.id);
- print("TITLE: "+o.name);
- print("STATUS: "+o.status);
- print("REQUIRED CLASS: "+o.class);
- print("");
- print(o.description);
- divider();
-
- audit(o.id+" record opened.");
+function getProject(id) {
+    return projects.find(p => p.id.toLowerCase() === id.toLowerCase());
 }
 
-// ==========================================
-// LOGS
-// ==========================================
-
-function showLogs(){
- if(!requireElevated())return;
-
- divider();
- print("NULLPAD // SYSTEM EVENT LOG");
- divider();
-
- logs.concat(auditLog).forEach(x=>print(x));
-
- divider();
+function statusColor(status) {
+    if (status === "ACTIVE") return "green";
+    if (status === "COMPLETED") return "muted";
+    if (status === "UNDER REVIEW") return "yellow";
+    return "";
 }
 
-// ==========================================
-// STATUS
-// ==========================================
 
-function showStatus(){
- divider();
- print("GATEWAY STATUS REPORT");
- divider();
+/* ==========================================
+   HELP COMMAND
+========================================== */
 
- print("GATEWAY ID: NG-001");
- print("SYSTEM: ACTIVE");
- print("AUTHENTICATION: VERIFIED");
- print("SESSION: OPERATIONAL");
+function showHelp() {
+    heading("AVAILABLE COMMANDS");
 
- print("ACCESS LEVEL: "+
-  (accessGranted?"ELEVATED":"STANDARD"));
+    print("GENERAL");
+    print("  Help                  - Show command list");
+    print("  Clear                 - Clear terminal");
+    print("  Status                - System status");
+    print("  Database              - Database overview");
 
- print("REGISTERED PROJECTS: 02");
- print("REGISTERED AGENTS: "+agents.length);
- print("REGISTERED OPERATIONS: "+operations.length);
- print("DATABASE: MOUNTED");
- print("ARCHIVE: "+(accessGranted?"UNLOCKED":"RESTRICTED"));
- print("LIVE SERVER CONNECTION: NOT VERIFIED");
+    printBlank();
+    print("AGENTS");
+    print("  Agents                - List all agents");
+    print("  Agents Info           - Department structure");
+    print("  Agents open NP        - Agent profile");
 
- divider();
+    printBlank();
+    print("DEPARTMENTS");
+    print("  Departments           - List departments");
+    print("  Departments open DEP-001");
+
+    printBlank();
+    print("OPERATIONS");
+    print("  Operations            - List all operations");
+    print("  Operations open OP-081");
+    print("  Operations reports OP-081");
+    print("  Operations history OP-081");
+
+    printBlank();
+    print("PROJECTS");
+    print("  Projects              - List all projects");
+    print("  Projects open 001");
+    print("  Projects operations 001");
+    print("  Projects reports 001");
+    print("  Projects history 001");
+
+    printBlank();
+    print("SYSTEM");
+    print("  Logout                - End session");
+    print("  Help                  - Display this page");
 }
 
-// ==========================================
-// DIVISION PROFILE
-// ==========================================
 
-function showNullpad(){
- divider();
- print("NULLPAD // DIVISION PROFILE");
- divider();
+/* ==========================================
+   AGENTS COMMANDS
+========================================== */
 
- print("NULLPAD is a classified subdivision of the");
- print("Metaphysical Sciences Department, established in 2013.");
- print("");
+function showAgents() {
+    heading("REGISTERED AGENTS");
 
- print("PRIMARY FIELD:");
- print("Minecraft server anomalies and irregular phenomena.");
- print("");
+    agents.forEach(agent => {
+        print(agent.id + " // " + agent.role + " // " + agent.department);
+    });
 
- print("The division documents unusual world behaviour,");
- print("terrain irregularities, unexplained sounds,");
- print("inconsistent mechanics and anomalous entities.");
- print("");
-
- print("Reports are treated as records, not conclusions.");
- print("Observations are preserved with version details,");
- print("timestamps and repeatability notes wherever available.");
- print("");
-
- print("FOUNDATION: 2013");
- print("PARENT: Metaphysical Sciences Department");
- print("REGISTERED PROJECTS: 02");
- print("RECORD STATUS: CLASSIFIED / ONGOING");
-
- divider();
+    printBlank();
+    print("TOTAL AGENTS: " + agents.length, "green");
 }
 
-// ==========================================
-// ACCESS CONTROL
-// ==========================================
+function showAgentProfile(id) {
+    const agent = getAgent(id);
 
-function showAccess(){
- divider();
- print("NULLPAD ACCESS CONTROL");
- print("CLEARANCE MANAGEMENT INTERFACE");
- divider();
+    if (!agent) return notFound("AGENT", id);
 
- print("AUTHENTICATION: ACCEPTED");
- print("CURRENT CLEARANCE: "+
-  (accessGranted?"ELEVATED":"STANDARD"));
+    heading("AGENT PROFILE // " + agent.id);
 
- print("");
- print("STANDARD CLEARANCE:");
- print("Public project records and basic services.");
+    field("NAME", agent.name);
+    field("ROLE", agent.role);
+    field("DEPARTMENT", agent.department);
 
- print("");
- print("ELEVATED CLEARANCE:");
- print("Restricted archives, personnel registry,");
- print("system logs and operation records.");
+    printBlank();
+    print("DESCRIPTION:");
+    print(agent.description);
 
- print("");
- print("USAGE: Access <authorization key>");
+    printBlank();
+    print("RESPONSIBILITIES:");
 
- divider();
+    agent.responsibilities.forEach((task, index) => {
+        print((index + 1) + ". " + task);
+    });
+
+    printBlank();
+    print("RELATED OPERATIONS:");
+
+    const related = operations.filter(o => o.agents.includes(agent.id));
+
+    if (!related.length) {
+        print("No linked operations.");
+    } else {
+        related.forEach(o => print(o.id + " // " + o.title));
+    }
+
+    printBlank();
+    print("RELATED PROJECTS:");
+
+    const relatedProjects = projects.filter(p => p.team.includes(agent.id));
+
+    if (!relatedProjects.length) {
+        print("No linked projects.");
+    } else {
+        relatedProjects.forEach(p => print(p.id + " // " + p.name));
+    }
 }
 
-function authenticate(password){
- if(authenticated){
-  print("SESSION ALREADY ACTIVE.","warning");
-  return;
- }
+function showAgentsInfo() {
+    heading("NULLPAD // DEPARTMENT STRUCTURE");
 
- if(password!==LOGIN_PASSWORD){
-  print("AUTHENTICATION FAILED.","error");
-  print("INVALID CREDENTIALS.");
-  audit("Failed login attempt.");
-  return;
- }
+    print("ORGANIZATION STRUCTURE AND RESPONSIBILITIES");
+    printBlank();
 
- authenticated=true;
- accessGranted=false;
+    departments.forEach(dep => {
+        print(dep.id + " // " + dep.name, "green");
+        field("LEADER", dep.leader);
+        print("PURPOSE: " + dep.purpose);
+        print("RESPONSIBILITIES:");
 
- updateSession();
+        dep.tasks.forEach((task, index) => {
+            print("  " + (index + 1) + ". " + task);
+        });
 
- print("AUTHENTICATION ACCEPTED.","success");
- print("SESSION: ACTIVE");
- print("CLEARANCE: STANDARD");
- print("WELCOME TO NULLPAD NETWORK GATEWAY.");
+        printBlank();
+    });
 
- audit("Standard session authenticated.");
+    print("DEPARTMENT COUNT: " + departments.length, "green");
+    print("REGISTERED AGENTS: " + agents.length, "green");
 }
 
-function grantAccess(key){
- if(!authenticated){
-  print("AUTHENTICATION REQUIRED.","error");
-  print("LOGIN BEFORE REQUESTING CLEARANCE.");
-  return;
- }
+function showDepartments() {
+    heading("NULLPAD DEPARTMENTS");
 
- if(accessGranted){
-  print("ELEVATED CLEARANCE ALREADY ACTIVE.","warning");
-  return;
- }
-
- if(key!==ACCESS_PASSWORD){
-  print("AUTHORIZATION FAILED.","error");
-  print("INVALID AUTHORIZATION KEY.");
-  audit("Failed clearance request.");
-  return;
- }
-
- accessGranted=true;
- updateSession();
-
- print("AUTHORIZATION ACCEPTED.","success");
- print("RESTRICTED SESSION ENABLED.");
- print("CLEARANCE: ELEVATED");
- print("RESTRICTED ARCHIVES: UNLOCKED");
-
- audit("Elevated clearance granted.");
+    departments.forEach(dep => {
+        print(dep.id + " // " + dep.name);
+        print("LEADER: " + dep.leader);
+        printBlank();
+    });
 }
 
-function logout(){
- if(!authenticated){
-  print("NO ACTIVE SESSION.","warning");
-  return;
- }
+function showDepartmentProfile(id) {
+    const dep = getDepartment(id);
 
- authenticated=false;
- accessGranted=false;
+    if (!dep) return notFound("DEPARTMENT", id);
 
- updateSession();
+    heading("DEPARTMENT PROFILE // " + dep.id);
 
- print("SESSION TERMINATED.","warning");
- print("ALL CLEARANCE PRIVILEGES REVOKED.");
- print("AUTHENTICATION REQUIRED.");
+    field("NAME", dep.name);
+    field("LEADER", dep.leader);
 
- audit("Session terminated.");
+    printBlank();
+    print("PURPOSE:");
+    print(dep.purpose);
+
+    printBlank();
+    print("RESPONSIBILITIES:");
+
+    dep.tasks.forEach((task, i) => {
+        print((i + 1) + ". " + task);
+    });
+
+    printBlank();
+    print("ASSIGNED AGENTS:");
+
+    agents.filter(a => a.department === dep.id).forEach(a => {
+        print(a.id + " // " + a.role);
+    });
+
+    printBlank();
+    print("RELATED OPERATIONS:");
+
+    const related = operations.filter(o => o.departments.includes(dep.id));
+
+    related.forEach(o => print(o.id + " // " + o.title));
 }
 
-// ==========================================
-// COMMAND INTERPRETER
-// ==========================================
 
-function execute(){
- const raw=input.value.trim();
- if(!raw)return;
+/* ==========================================
+   OPERATIONS COMMANDS
+========================================== */
 
- input.value="";
+function showOperations() {
+    heading("OPERATIONS DATABASE");
 
- print((authenticated?"NP_ROOT > ":"LOGIN > ")+raw);
+    operations.forEach(op => {
+        print(op.id + " // " + op.title, "green");
+        print("STATUS: " + op.status, statusColor(op.status));
+        print("PROJECT: " + op.project);
+        printBlank();
+    });
 
- commandHistory.push(raw);
- historyPosition=commandHistory.length;
-
- const parts=raw.split(/\s+/);
- const command=parts[0].toLowerCase();
- const arg=parts[1]||"";
- const argLower=arg.toLowerCase();
- const arg2=parts[2]||"";
-
- if(command==="login"){
-  const password=raw.slice(parts[0].length).trim();
-
-  if(!password){
-   print("USAGE: LOGIN <password>","warning");
-  }else{
-   authenticate(password);
-  }
-
-  return;
- }
-
- if(command==="clear"){
-  clearScreen();
-  return;
- }
-
- if(!authenticated){
-  if(command==="help"){
-   divider();
-   print("NULLPAD NETWORK GATEWAY");
-   print("AUTHENTICATION REQUIRED.");
-   print("USAGE: LOGIN <password>");
-   print("SESSION STATUS: LOCKED");
-   divider();
-  }else{
-   print("AUTHENTICATION REQUIRED.","error");
-   print("EXECUTION BLOCKED.");
-   print("USE: LOGIN <password>","warning");
-  }
-
-  return;
- }
-
- if(command==="logout"){
-  logout();
- }
-
- else if(command==="help"){
-  showHelp();
- }
-
- else if(command==="access"){
-  if(!arg){
-   showAccess();
-  }else{
-   grantAccess(raw.slice(raw.indexOf(" ")+1).trim());
-  }
- }
-
- else if(command==="status"){
-  showStatus();
- }
-
- else if(command==="whoami"){
-  divider();
-  print("SESSION USER: NP_ROOT");
-  print("ACCESS CLASS: "+(accessGranted?"ELEVATED":"STANDARD"));
-  print("SESSION: ACTIVE");
-  print("AUTHENTICATION: VERIFIED");
-  divider();
- }
-
- else if(
-  command==="about"||
-  raw.toLowerCase()==="who's nullpad?"||
-  raw.toLowerCase()==="who's nullpad"
- ){
-  showNullpad();
- }
-
- else if(command==="version"){
-  print("NULLPAD COMMAND INTERFACE");
-  print("VERSION: 1.2.0");
-  print("GATEWAY BUILD: NG-001");
-  print("ACCESS CONTROL: ENABLED");
- }
-
- else if(command==="date"){
-  print("LOCAL SYSTEM DATE: "+new Date().toLocaleString());
- }
-
- else if(command==="service"||command==="services"){
-  showServices();
- }
-
- else if(command==="projects"||command==="servers"){
-  showProjects();
- }
-
- else if(command==="agents"){
-  if(argLower==="list"||!arg){
-   showAgents();
-  }else{
-   print("USAGE: Agents list","warning");
-  }
- }
-
- else if(command==="data"){
-  if(argLower==="open"&&arg2){
-   openData(arg2);
-  }else{
-   showDataIndex();
-  }
- }
-
- else if(command==="operations"){
-  if(argLower==="status"||!arg){
-   showOperations();
-  }else if(argLower==="open"&&arg2){
-   operationDetails(arg2);
-  }else{
-   print("USAGE: Operations status");
-   print("       Operations open <id>");
-  }
- }
-
- else if(command==="logs"){
-  showLogs();
- }
-
- else if(command==="files"){
-  if(!requireElevated())return;
-
-  divider();
-  print("ARCHIVE FILE INDEX");
-  divider();
-  print("DB-001 // FRESHLlKE");
-  print("DB-871 // RASEBALO");
-  print("OPERATION RECORDS // 082");
-  print("PERSONNEL REGISTRY");
-  print("SYSTEM LOGS");
-  print("ARCHIVE INTEGRITY: VERIFIED");
-  divider();
- }
-
- else if(command==="connect"){
-  print("REGISTERED ENDPOINTS:");
-  print("freshlike.gaming");
-  print("rasebalo.fun");
-  print("LIVE REACHABILITY: NOT VERIFIED.","warning");
-  print("CONNECTION TEST: NOT PERFORMED.");
- }
-
- else{
-  print("UNKNOWN COMMAND: "+raw,"error");
-  print("Type Help to see available commands.");
- }
+    print("TOTAL REGISTERED OPERATIONS: " + operations.length, "green");
 }
 
-// ==========================================
-// COMMAND HISTORY
-// ==========================================
+function showOperationProfile(id) {
+    const op = getOperation(id);
 
-input.addEventListener("keydown",e=>{
- if(e.key==="Enter"){
-  execute();
- }
+    if (!op) return notFound("OPERATION", id);
 
- if(e.key==="ArrowUp"){
-  e.preventDefault();
+    heading("OPERATION FILE // " + op.id);
 
-  if(historyPosition>0){
-   historyPosition--;
-   input.value=commandHistory[historyPosition];
-  }
- }
+    field("TITLE", op.title);
+    field("STATUS", op.status);
+    field("CLASSIFICATION", op.classification);
+    field("DATE", op.date);
+    field("LOCATION", op.location);
+    field("DIRECTOR", op.director);
+    field("COORDINATOR", op.coordinator);
+    field("PROJECT", op.project);
 
- if(e.key==="ArrowDown"){
-  e.preventDefault();
+    printBlank();
+    print("OBJECTIVE:");
+    print(op.objective);
 
-  if(historyPosition<commandHistory.length-1){
-   historyPosition++;
-   input.value=commandHistory[historyPosition];
-  }else{
-   historyPosition=commandHistory.length;
-   input.value="";
-  }
- }
+    printBlank();
+    print("DESCRIPTION:");
+    print(op.description);
+
+    printBlank();
+    print("ASSIGNED AGENTS:");
+
+    op.agents.forEach(agent => {
+        const data = getAgent(agent);
+        print(agent + (data ? " // " + data.role : ""));
+    });
+
+    printBlank();
+    print("RESPONSIBLE DEPARTMENTS:");
+
+    op.departments.forEach(id => {
+        const dep = getDepartment(id);
+        print(id + (dep ? " // " + dep.name : ""));
+    });
+
+    printBlank();
+    print("REPORTS REGISTERED: " + op.reports.length);
+
+    op.reports.forEach(r => {
+        print(r.id + " // " + r.title);
+    });
+
+    printBlank();
+    print("CONCLUSION:");
+    print(op.conclusion);
+
+    printBlank();
+    print("USE 'Operations reports " + op.id + "' TO VIEW REPORTS.");
+    print("USE 'Operations history " + op.id + "' TO VIEW HISTORY.");
+}
+
+function showOperationReports(id) {
+    const op = getOperation(id);
+
+    if (!op) return notFound("OPERATION", id);
+
+    heading("OPERATION REPORTS // " + op.id);
+
+    if (!op.reports.length) {
+        print("NO REPORTS REGISTERED.", "yellow");
+        return;
+    }
+
+    op.reports.forEach(report => {
+        print(report.id, "green");
+        field("TITLE", report.title);
+        field("AUTHOR", report.author);
+        field("DATE", report.date);
+        print("CONTENT:");
+        print(report.content);
+        printBlank();
+    });
+
+    print("TOTAL REPORTS: " + op.reports.length, "green");
+}
+
+function showOperationHistory(id) {
+    const op = getOperation(id);
+
+    if (!op) return notFound("OPERATION", id);
+
+    heading("OPERATION HISTORY // " + op.id);
+
+    op.history.forEach((event, index) => {
+        print((index + 1) + ". " + event);
+    });
+
+    printBlank();
+    print("END OF HISTORY RECORD.");
+}
+
+
+/* ==========================================
+   PROJECT COMMANDS
+========================================== */
+
+function showProjects() {
+    heading("PROJECT DATABASE");
+
+    projects.forEach(project => {
+        print(project.id + " // " + project.name, "green");
+        print("STATUS: " + project.status, statusColor(project.status));
+        print("MANAGER: " + project.manager);
+        printBlank();
+    });
+
+    print("TOTAL REGISTERED PROJECTS: " + projects.length, "green");
+}
+
+function showProjectProfile(id) {
+    const project = getProject(id);
+
+    if (!project) return notFound("PROJECT", id);
+
+    heading("PROJECT FILE // " + project.id);
+
+    field("NAME", project.name);
+    field("STATUS", project.status);
+    field("CLASSIFICATION", project.classification);
+    field("MANAGER", project.manager);
+    field("CREATED", project.created);
+    field("LOCATION", project.location);
+
+    printBlank();
+    print("DESCRIPTION:");
+    print(project.description);
+
+    printBlank();
+    print("OBJECTIVE:");
+    print(project.objective);
+
+    printBlank();
+    print("PROJECT TEAM:");
+
+    project.team.forEach(agent => {
+        const data = getAgent(agent);
+        print(agent + (data ? " // " + data.role : ""));
+    });
+
+    printBlank();
+    print("LINKED OPERATIONS:");
+
+    project.operations.forEach(id => {
+        const op = getOperation(id);
+        print(id + (op ? " // " + op.title : ""));
+    });
+
+    printBlank();
+    print("REGISTERED REPORTS: " + project.reports.length);
+
+    project.reports.forEach(report => {
+        print(report.id + " // " + report.title);
+    });
+
+    printBlank();
+    print("USE 'Projects operations " + project.id + "' TO VIEW OPERATIONS.");
+    print("USE 'Projects reports " + project.id + "' TO VIEW REPORTS.");
+    print("USE 'Projects history " + project.id + "' TO VIEW HISTORY.");
+}
+
+function showProjectOperations(id) {
+    const project = getProject(id);
+
+    if (!project) return notFound("PROJECT", id);
+
+    heading("PROJECT OPERATIONS // " + project.id);
+
+    const linked = operations.filter(op => project.operations.includes(op.id));
+
+    if (!linked.length) {
+        print("NO LINKED OPERATIONS.", "yellow");
+        return;
+    }
+
+    linked.forEach(op => {
+        print(op.id + " // " + op.title, "green");
+        field("STATUS", op.status);
+        field("COORDINATOR", op.coordinator);
+        field("DATE", op.date);
+        printBlank();
+    });
+
+    print("TOTAL LINKED OPERATIONS: " + linked.length, "green");
+}
+
+function showProjectReports(id) {
+    const project = getProject(id);
+
+    if (!project) return notFound("PROJECT", id);
+
+    heading("PROJECT REPORTS // " + project.id);
+
+    if (!project.reports.length) {
+        print("NO REPORTS REGISTERED.", "yellow");
+        return;
+    }
+
+    project.reports.forEach(report => {
+        print(report.id, "green");
+        field("TITLE", report.title);
+        field("AUTHOR", report.author);
+        field("DATE", report.date);
+        print("CONTENT:");
+        print(report.content);
+        printBlank();
+    });
+
+    print("TOTAL PROJECT REPORTS: " + project.reports.length, "green");
+}
+
+function showProjectHistory(id) {
+    const project = getProject(id);
+
+    if (!project) return notFound("PROJECT", id);
+
+    heading("PROJECT HISTORY // " + project.id);
+
+    project.history.forEach((event, index) => {
+        print((index + 1) + ". " + event);
+    });
+
+    printBlank();
+    print("END OF PROJECT HISTORY.");
+}
+
+
+/* ==========================================
+   SYSTEM COMMANDS
+========================================== */
+
+function showStatus() {
+    heading("SYSTEM STATUS");
+
+    field("SYSTEM", "NULLPAD");
+    field("CONNECTION", "ESTABLISHED");
+    field("DATABASE", "ONLINE");
+    field("AGENTS", agents.length);
+    field("DEPARTMENTS", departments.length);
+    field("OPERATIONS", operations.length);
+    field("PROJECTS", projects.length);
+
+    printBlank();
+    print("ALL SYSTEMS OPERATIONAL.", "green");
+}
+
+function showDatabase() {
+    heading("DATABASE OVERVIEW");
+
+    print("AGENT DATABASE: " + agents.length + " RECORDS");
+    print("DEPARTMENT DATABASE: " + departments.length + " RECORDS");
+    print("OPERATION DATABASE: " + operations.length + " RECORDS");
+    print("PROJECT DATABASE: " + projects.length + " RECORDS");
+
+    const reportCount =
+        operations.reduce((sum, op) => sum + op.reports.length, 0) +
+        projects.reduce((sum, project) => sum + project.reports.length, 0);
+
+    print("REPORT RECORDS: " + reportCount);
+    printBlank();
+    print("DATABASE CONNECTION: ACTIVE", "green");
+}
+
+
+/* ==========================================
+   COMMAND PROCESSOR
+========================================== */
+
+function runCommand() {
+    const input = document.getElementById("commandInput");
+    const raw = input.value.trim();
+
+    if (!raw) return;
+
+    print("NP:// " + raw, "green");
+    input.value = "";
+
+    const args = raw.split(/\s+/);
+    const command = args[0].toLowerCase();
+    const subcommand = args[1] ? args[1].toLowerCase() : "";
+    const id = args[2] || "";
+
+    if (command === "help") {
+        showHelp();
+        return;
+    }
+
+    if (command === "clear") {
+        output.innerHTML = "";
+        return;
+    }
+
+    if (command === "status") {
+        showStatus();
+        return;
+    }
+
+    if (command === "database") {
+        showDatabase();
+        return;
+    }
+
+    if (command === "logout") {
+        document.getElementById("terminalScreen").classList.add("hidden");
+        document.getElementById("loginScreen").classList.remove("hidden");
+        document.getElementById("passwordInput").value = "";
+        document.getElementById("loginError").textContent = "";
+        output.innerHTML = "";
+        return;
+    }
+
+    if (command === "agents") {
+        if (!subcommand) {
+            showAgents();
+        } else if (subcommand === "info") {
+            showAgentsInfo();
+        } else if (subcommand === "open" && id) {
+            showAgentProfile(id);
+        } else {
+            print("INVALID AGENTS COMMAND.", "red");
+            print("Try: Agents | Agents Info | Agents open NP");
+        }
+        return;
+    }
+
+    if (command === "departments") {
+        if (!subcommand) {
+            showDepartments();
+        } else if (subcommand === "open" && id) {
+            showDepartmentProfile(id);
+        } else {
+            print("INVALID DEPARTMENTS COMMAND.", "red");
+            print("Try: Departments | Departments open DEP-001");
+        }
+        return;
+    }
+
+    if (command === "operations") {
+        if (!subcommand) {
+            showOperations();
+        } else if (subcommand === "open" && id) {
+            showOperationProfile(id);
+        } else if (subcommand === "reports" && id) {
+            showOperationReports(id);
+        } else if (subcommand === "history" && id) {
+            showOperationHistory(id);
+        } else {
+            print("INVALID OPERATIONS COMMAND.", "red");
+            print("Try: Operations | Operations open OP-081");
+            print("Try: Operations reports OP-081");
+            print("Try: Operations history OP-081");
+        }
+        return;
+    }
+
+    if (command === "projects") {
+        if (!subcommand) {
+            showProjects();
+        } else if (subcommand === "open" && id) {
+            showProjectProfile(id);
+        } else if (subcommand === "operations" && id) {
+            showProjectOperations(id);
+        } else if (subcommand === "reports" && id) {
+            showProjectReports(id);
+        } else if (subcommand === "history" && id) {
+            showProjectHistory(id);
+        } else {
+            print("INVALID PROJECTS COMMAND.", "red");
+            print("Try: Projects | Projects open 001");
+            print("Try: Projects operations 001");
+            print("Try: Projects reports 001");
+            print("Try: Projects history 001");
+        }
+        return;
+    }
+
+    print("UNKNOWN COMMAND: " + raw, "red");
+    print("Type Help to view available commands.", "muted");
+}
+
+document.getElementById("commandInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") runCommand();
 });
 
-// ==========================================
-// BOOT SEQUENCE
-// ==========================================
 
-async function boot(){
+/* ==========================================
+   CLOCK
+========================================== */
 
- clearScreen();
+function updateClock() {
+    const now = new Date();
 
- const bootLine=async(text,type="system")=>{
-  await print(text,type);
-  await sleep(120);
- };
-
- await sleep(500);
-
- await bootLine("NULLPAD NETWORK GATEWAY");
- await bootLine("METAPHYSICAL SCIENCES DIVISION");
- await bootLine("INITIALIZING NG-001...");
- await bootLine("--------------------------------------------");
-
- await bootLine("[ OK ] Local interface initialized.");
- await bootLine("[ OK ] Command interpreter loaded.");
- await bootLine("[ OK ] Database mounted.");
- await bootLine("[ OK ] Agent registry indexed.");
- await bootLine("[ OK ] Operation registry indexed.");
- await bootLine("[ OK ] Archive integrity checked.");
- await bootLine("[ OK ] Authentication service ready.");
-
- await bootLine("--------------------------------------------");
-
- await bootLine("SYSTEM INITIALIZATION: COMPLETE","success");
- await bootLine("GATEWAY STATUS: ACTIVE","success");
-
- await bootLine("REGISTERED AGENTS: "+agents.length);
- await bootLine("REGISTERED OPERATIONS: "+operations.length);
-
- await sleep(350);
-
- await bootLine("--------------------------------------------");
-
- await bootLine("AUTHENTICATION REQUIRED.","warning");
- await bootLine("USE LOGIN <password> TO BEGIN.");
- await bootLine("SESSION STATUS: LOCKED");
-
- await bootLine("--------------------------------------------");
-
- updateSession();
- input.focus();
+    document.getElementById("clock").textContent =
+        now.toLocaleDateString() + " // " +
+        now.toLocaleTimeString();
 }
 
-// ==========================================
-// START
-// ==========================================
-
-updateSession();
-boot();
+setInterval(updateClock, 1000);
+updateClock();
 
 </script>
 </body>
